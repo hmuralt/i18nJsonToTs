@@ -1,4 +1,4 @@
-import { ObjectDescription, NoneStringValueDescription } from "./IntermediateTypes";
+import { ObjectDescription, NoneStringValueDescription, StringValueDescription } from "./IntermediateTypes";
 
 export function convertJson(jsonString: string) {
   const json = JSON.parse(jsonString);
@@ -10,7 +10,8 @@ function convertObject(obj: {}): ObjectDescription {
 
   const propertyDescriptions = keys.map((key) => {
     const value = obj[key];
-    const valueDescription = convertNoneStringJsonPropertyValue(value);
+    const valueDescription =
+      typeof value === "string" ? convertStringPropertyValue(value) : convertNoneStringJsonPropertyValue(value);
     return {
       key,
       valueDescription
@@ -23,6 +24,12 @@ function convertObject(obj: {}): ObjectDescription {
 }
 
 function convertNoneStringJsonPropertyValue(value: number | boolean | []): NoneStringValueDescription {
+  return {
+    value
+  };
+}
+
+function convertStringPropertyValue(value: string): StringValueDescription {
   return {
     value
   };
