@@ -1,7 +1,7 @@
 {
   "name": "i18n-json-to-ts",
   "version": "2.1.1",
-  "description": "Recomposed approach of using redux with TypeScript in a react app",
+  "description": "Tool to generate TypeScript out of I18N JSON strings.",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -33,7 +33,6 @@
     "ts-jest": "^24.0.0",
     "tslint": "^5.12.1",
     "tslint-config-prettier": "^1.18.0",
-    "tslint-react": "^4.0.0",
     "typescript": "^3.4.2"
   }
 }
