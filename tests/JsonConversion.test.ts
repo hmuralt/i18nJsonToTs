@@ -1,6 +1,6 @@
-import { convertJson } from "../src/JsonConvertion";
+import { convertJson } from "../src/JsonConversion";
 
-describe("JsonConvertion", () => {
+describe("JsonConversion", () => {
   describe("convertJson", () => {
     describe("when converting boolean property", () => {
       it("converts property to NoneStringValueDescription", () => {
