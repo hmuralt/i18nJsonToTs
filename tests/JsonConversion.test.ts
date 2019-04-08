@@ -1,5 +1,10 @@
 import { convertJson } from "../src/JsonConversion";
-import { PropertyType, ArgType, PlaceholderFunctionPropertyDescription } from "../src/IntermediateStructure";
+import {
+  PropertyType,
+  ArgType,
+  PlaceholderFunctionPropertyDescription,
+  ObjectPropertyDescription
+} from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
   describe("convertJson", () => {
@@ -30,7 +35,7 @@ describe("JsonConversion", () => {
     });
 
     describe("when converting string properties", () => {
-      it("converts simple string to StringValueDescription", () => {
+      it("converts simple string to StringPropertyDescription", () => {
         // Arrange
         const testPropertyName = "myStringProp";
         const testPropertyValue = "This is a test value";
@@ -184,6 +189,49 @@ describe("JsonConversion", () => {
             type: ArgType.String
           }
         ]);
+      });
+    });
+
+    describe("when converting object properties", () => {
+      it("converts to ObjectPropertyDescription", () => {
+        // Arrange
+        const testPropertyName = "myObjectProp";
+        const testPropertyValue = {};
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
+
+        // Assert
+        expect(result.type).toBe(PropertyType.Object);
+        expect(result.key).toBe(testPropertyName);
+        expect(result.valueDescription).toEqual({
+          propertyDescriptions: []
+        });
+      });
+
+      it("converts properties of the object", () => {
+        // Arrange
+        const testInnerPropertyName = "myStringProp";
+        const testInnerPropertyValue = "This is a test value";
+        const testPropertyName = "myObjectProp";
+        const testPropertyValue = {
+          [testInnerPropertyName]: testInnerPropertyValue
+        };
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0] as ObjectPropertyDescription;
+
+        // Assert
+        expect(result.type).toBe(PropertyType.Object);
+        expect(result.key).toBe(testPropertyName);
+        expect(result.valueDescription.propertyDescriptions[0].type).toEqual(PropertyType.String);
+        expect(result.valueDescription.propertyDescriptions[0].key).toEqual(testInnerPropertyName);
       });
     });
   });

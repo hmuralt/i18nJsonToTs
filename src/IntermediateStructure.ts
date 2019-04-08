@@ -1,7 +1,11 @@
+export type JsonType = string | number | object | boolean;
+
 export enum PropertyType {
   NoneString,
   String,
-  PlaceholderFunction
+  PlaceholderFunction,
+  Object,
+  PluralFormObject
 }
 
 export interface PropertyDescription<TValueDescription = {}> {
@@ -19,7 +23,7 @@ export interface StringPropertyDescription extends PropertyDescription<StringVal
 }
 
 export interface NoneStringValueDescription {
-  value: boolean | number | [];
+  value: boolean | number | JsonType[];
 }
 
 export interface NoneStringPropertyDescription extends PropertyDescription<NoneStringValueDescription> {
@@ -49,8 +53,12 @@ export interface PlaceholderFunctionPropertyDescription
   type: PropertyType.PlaceholderFunction;
 }
 
-export interface ObjectDescription {
+export interface ObjectValueDescription {
   propertyDescriptions: PropertyDescription[];
+}
+
+export interface ObjectPropertyDescription extends PropertyDescription<ObjectValueDescription> {
+  type: PropertyType.Object;
 }
 
 export function getTypeFrom(typeName: string): ArgType {

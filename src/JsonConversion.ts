@@ -1,5 +1,5 @@
 import {
-  ObjectDescription,
+  ObjectValueDescription,
   NoneStringValueDescription,
   StringValueDescription,
   PlaceholderFunctionValueDescription,
@@ -9,7 +9,9 @@ import {
   StringPropertyDescription,
   PlaceholderFunctionPropertyDescription,
   PropertyType,
-  Arg
+  Arg,
+  ObjectPropertyDescription,
+  JsonType
 } from "./IntermediateStructure";
 import { getAllMatches } from "./RegexUtils";
 
@@ -20,12 +22,22 @@ export function convertJson(jsonString: string) {
   return convertObject(json);
 }
 
-function convertObject(obj: {}): ObjectDescription {
+function convertObject(obj: {}): ObjectValueDescription {
   const keys = Object.keys(obj);
 
   const propertyDescriptions = keys.map((key) => {
     const value = obj[key];
-    return typeof value === "string" ? convertStringProperty(key, value) : convertNoneStringProperty(key, value);
+    const valueType = typeof value;
+
+    if (valueType === "string") {
+      return convertStringProperty(key, value);
+    }
+
+    if (valueType === "object" && !Array.isArray(value)) {
+      return convertObjectProperty(key, value);
+    }
+
+    return convertNoneStringProperty(key, value);
   });
 
   return {
@@ -33,7 +45,15 @@ function convertObject(obj: {}): ObjectDescription {
   };
 }
 
-function convertNoneStringProperty(key: string, value: number | boolean | []): NoneStringPropertyDescription {
+function convertObjectProperty(key: string, value: {}): ObjectPropertyDescription {
+  return {
+    type: PropertyType.Object,
+    key,
+    valueDescription: convertObject(value)
+  };
+}
+
+function convertNoneStringProperty(key: string, value: number | boolean | JsonType[]): NoneStringPropertyDescription {
   return {
     type: PropertyType.NoneString,
     key,
@@ -41,7 +61,7 @@ function convertNoneStringProperty(key: string, value: number | boolean | []): N
   };
 }
 
-function convertNoneStringValue(value: number | boolean | []): NoneStringValueDescription {
+function convertNoneStringValue(value: number | boolean | JsonType[]): NoneStringValueDescription {
   return {
     value
   };
