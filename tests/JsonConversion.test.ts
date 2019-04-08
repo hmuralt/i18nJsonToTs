@@ -1,69 +1,36 @@
 import { convertJson } from "../src/JsonConversion";
+import { PropertyType, ArgType, PlaceholderFunctionPropertyDescription } from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
   describe("convertJson", () => {
-    describe("when converting boolean property", () => {
-      it("converts property to NoneStringValueDescription", () => {
+    describe("when converting none string properties", () => {
+      // tslint:disable-next-line: no-any
+      function noneStringPropertyDescriptionTest(testPropertyValue: any) {
         // Arrange
-        const testPropertyName = "myBooleanProp";
-        const testPropertyValue = true;
+        const testPropertyName = "myNoneStringProp";
         const testJsonObject = {
           [testPropertyName]: testPropertyValue
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
 
         // Assert
-        expect(result.propertyDescriptions[0].key).toBe(testPropertyName);
-        expect(result.propertyDescriptions[0].valueDescription).toEqual({
+        expect(result.type).toBe(PropertyType.NoneString);
+        expect(result.key).toBe(testPropertyName);
+        expect(result.valueDescription).toEqual({
           value: testPropertyValue
         });
-      });
+      }
+
+      it("converts boolean property to NoneStringPropertyDescription", () => noneStringPropertyDescriptionTest(true));
+      it("converts number property to NoneStringPropertyDescription", () => noneStringPropertyDescriptionTest(23236));
+      it("converts array property to NoneStringPropertyDescription", () =>
+        noneStringPropertyDescriptionTest([3, 7, 8]));
     });
 
-    describe("when converting number property", () => {
-      it("converts property to NoneStringValueDescription", () => {
-        // Arrange
-        const testPropertyName = "myNumberProp";
-        const testPropertyValue = 23662;
-        const testJsonObject = {
-          [testPropertyName]: testPropertyValue
-        };
-
-        // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
-
-        // Assert
-        expect(result.propertyDescriptions[0].key).toBe(testPropertyName);
-        expect(result.propertyDescriptions[0].valueDescription).toEqual({
-          value: testPropertyValue
-        });
-      });
-    });
-
-    describe("when converting array property", () => {
-      it("converts property to NoneStringValueDescription", () => {
-        // Arrange
-        const testPropertyName = "myArrayProp";
-        const testPropertyValue = [3, 7, 4, 8];
-        const testJsonObject = {
-          [testPropertyName]: testPropertyValue
-        };
-
-        // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
-
-        // Assert
-        expect(result.propertyDescriptions[0].key).toBe(testPropertyName);
-        expect(result.propertyDescriptions[0].valueDescription).toEqual({
-          value: testPropertyValue
-        });
-      });
-    });
-
-    describe("when converting string property", () => {
-      it("converts property to StringValueDescription", () => {
+    describe("when converting string properties", () => {
+      it("converts simple string to StringValueDescription", () => {
         // Arrange
         const testPropertyName = "myStringProp";
         const testPropertyValue = "This is a test value";
@@ -72,13 +39,151 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
 
         // Assert
-        expect(result.propertyDescriptions[0].key).toBe(testPropertyName);
-        expect(result.propertyDescriptions[0].valueDescription).toEqual({
+        expect(result.type).toBe(PropertyType.String);
+        expect(result.key).toBe(testPropertyName);
+        expect(result.valueDescription).toEqual({
           value: testPropertyValue
         });
+      });
+
+      it("converts string with placeholders to PlaceholderFunctionValueDescription", () => {
+        // Arrange
+        const testPropertyName = "myStringProp";
+        const testPlaceholderName = "adj";
+        const testPlaceholderType = "string";
+        const testPropertyValue = `This is a test with a {${testPlaceholderName}: ${testPlaceholderType}} placeholder.`;
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
+
+        // Assert
+        expect(result.type).toBe(PropertyType.PlaceholderFunction);
+        expect(result.key).toBe(testPropertyName);
+        expect(result.valueDescription).toEqual({
+          args: [
+            {
+              name: testPlaceholderName,
+              type: ArgType.String
+            }
+          ],
+          stringTemplate: [
+            "This is a test with a ",
+            {
+              name: testPlaceholderName,
+              type: ArgType.String
+            },
+            " placeholder."
+          ]
+        });
+      });
+
+      it("converts string with placeholders at the start to correct string template", () => {
+        // Arrange
+        const testPropertyName = "myStringProp";
+        const testPlaceholderName = "adj";
+        const testPlaceholderType = "string";
+        const testPropertyValue = `{${testPlaceholderName}: ${testPlaceholderType}} placeholder.`;
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject))
+          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+
+        // Assert
+        expect(result.valueDescription.stringTemplate).toEqual([
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          },
+          " placeholder."
+        ]);
+      });
+
+      it("converts string with placeholders at the start to correct string template", () => {
+        // Arrange
+        const testPropertyName = "myStringProp";
+        const testPlaceholderName = "adj";
+        const testPlaceholderType = "string";
+        const testPropertyValue = `it begins with {${testPlaceholderName}: ${testPlaceholderType}}`;
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject))
+          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+
+        // Assert
+        expect(result.valueDescription.stringTemplate).toEqual([
+          "it begins with ",
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          }
+        ]);
+      });
+
+      it("converts string with unkown placeholders type per default to string", () => {
+        // Arrange
+        const testPropertyName = "myStringProp";
+        const testPlaceholderName = "adj";
+        const testPlaceholderType = "foo";
+        const testPropertyValue = `{${testPlaceholderName}: ${testPlaceholderType}}`;
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject))
+          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+
+        // Assert
+        expect(result.valueDescription).toEqual({
+          args: [
+            {
+              name: testPlaceholderName,
+              type: ArgType.String
+            }
+          ],
+          stringTemplate: [
+            {
+              name: testPlaceholderName,
+              type: ArgType.String
+            }
+          ]
+        });
+      });
+
+      it("lists a placeholder appearing multiple times in string just once", () => {
+        // Arrange
+        const testPropertyName = "myStringProp";
+        const testPlaceholderName = "adj";
+        const testPlaceholderType = "foo";
+        const testPropertyValue = `1: {${testPlaceholderName}: ${testPlaceholderType}}, 2: {${testPlaceholderName}: ${testPlaceholderType}}.`;
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject))
+          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+
+        // Assert
+        expect(result.type).toBe(PropertyType.PlaceholderFunction);
+        expect(result.valueDescription.args).toEqual([
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          }
+        ]);
       });
     });
   });
