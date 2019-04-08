@@ -33,6 +33,7 @@ function convertObject(obj: {}): ObjectValueDescription {
       return convertStringProperty(key, value);
     }
 
+    // ignore arrays for the moment
     if (valueType === "object" && !Array.isArray(value)) {
       return convertObjectProperty(key, value);
     }
