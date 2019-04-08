@@ -22,6 +22,12 @@ export interface StringPropertyDescription extends PropertyDescription<StringVal
   type: PropertyType.String;
 }
 
+export function isStringPropertyDescription(
+  propertyDescription: PropertyDescription
+): propertyDescription is StringPropertyDescription {
+  return propertyDescription.type === PropertyType.String;
+}
+
 export interface NoneStringValueDescription {
   value: boolean | number | JsonType[];
 }
@@ -61,6 +67,24 @@ export interface ObjectPropertyDescription extends PropertyDescription<ObjectVal
   type: PropertyType.Object;
 }
 
+export interface PluralFormObjectDescription {
+  [count: number]: StringTemplate | string;
+  n: StringTemplate | string;
+}
+
+export interface PluralFunctionValueDescription {
+  args: Arg[];
+  values: PluralFormObjectDescription;
+}
+
+export interface PluralFormObjectPropertyDescription extends PropertyDescription<PluralFunctionValueDescription> {
+  type: PropertyType.PluralFormObject;
+}
+
+const reverseArgType = new Map(Object.keys(ArgType).map((argTypeKey) => [ArgType[argTypeKey], argTypeKey]));
+
 export function getTypeFrom(typeName: string): ArgType {
-  return ArgType[typeName] !== undefined ? ArgType[typeName] : ArgType.String;
+  const argTypeKey = reverseArgType.get(typeName);
+
+  return argTypeKey !== undefined ? ArgType[argTypeKey] : ArgType.String;
 }

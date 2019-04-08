@@ -3,7 +3,8 @@ import {
   PropertyType,
   ArgType,
   PlaceholderFunctionPropertyDescription,
-  ObjectPropertyDescription
+  ObjectPropertyDescription,
+  PluralFormObjectPropertyDescription
 } from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
@@ -232,6 +233,79 @@ describe("JsonConversion", () => {
         expect(result.key).toBe(testPropertyName);
         expect(result.valueDescription.propertyDescriptions[0].type).toEqual(PropertyType.String);
         expect(result.valueDescription.propertyDescriptions[0].key).toEqual(testInnerPropertyName);
+      });
+
+      it("converts plural form objects to PluralFormObjectPropertyDescription", () => {
+        // Arrange
+        const testPropertyName = "myObjectProp";
+        const testPropertyValue = {
+          0: "No tests",
+          1: "One test",
+          n: "{count: number} tests"
+        };
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject))
+          .propertyDescriptions[0] as PluralFormObjectPropertyDescription;
+
+        // Assert
+        expect(result.type).toBe(PropertyType.PluralFormObject);
+        expect(result.key).toBe(testPropertyName);
+        expect(result.valueDescription).toEqual({
+          args: [
+            {
+              name: "count",
+              type: "number"
+            }
+          ],
+          values: {
+            0: "No tests",
+            1: "One test",
+            n: [
+              {
+                name: "count",
+                type: ArgType.Number
+              },
+              " tests"
+            ]
+          }
+        });
+      });
+
+      it("adds all args of the plural form objects property values", () => {
+        // Arrange
+        const testPropertyName = "myObjectProp";
+        const testPropertyValue = {
+          0: "No { somePlaceholder: toString } tests",
+          1: "One { anotherPlaceholder: string } test",
+          n: "{count: number} tests"
+        };
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject))
+          .propertyDescriptions[0] as PluralFormObjectPropertyDescription;
+
+        // Assert
+        expect(result.valueDescription.args).toEqual([
+          {
+            name: "count",
+            type: "number"
+          },
+          {
+            name: "somePlaceholder",
+            type: "toString"
+          },
+          {
+            name: "anotherPlaceholder",
+            type: "string"
+          }
+        ]);
       });
     });
   });
