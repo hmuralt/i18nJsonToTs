@@ -5,17 +5,13 @@ import {
   PlaceholderFunctionValueDescription,
   StringTemplate,
   getTypeFrom,
-  NoneStringPropertyDescription,
-  StringPropertyDescription,
-  PlaceholderFunctionPropertyDescription,
-  PropertyType,
   Arg,
-  ObjectPropertyDescription,
   JsonType,
-  PluralFormObjectPropertyDescription,
   PluralFunctionValueDescription,
   ArgType,
-  isStringPropertyDescription
+  isStringValueDescription,
+  ValueDescription,
+  ValueType
 } from "./IntermediateStructure";
 import { getAllMatches } from "./RegexUtils";
 
@@ -31,36 +27,14 @@ export function convertJson(jsonString: string) {
   return convertObject(json);
 }
 
-function convertObjectProperty(
-  key: string,
-  value: {}
-): ObjectPropertyDescription | PluralFormObjectPropertyDescription {
-  if (isPluralFormObject(value)) {
-    return {
-      type: PropertyType.PluralFormObject,
-      key,
-      valueDescription: convertPluralFormObject(value)
-    };
-  }
-
-  return {
-    type: PropertyType.Object,
-    key,
-    valueDescription: convertObject(value)
-  };
+function convertObject(value: {}): ObjectValueDescription | PluralFunctionValueDescription {
+  return isPluralFormObject(value) ? convertPluralFormObject(value) : convertSimpleObject(value);
 }
 
 function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDescription {
-  const argMap = new Map<string, Arg>([["count", { name: "count", type: ArgType.Number }]]);
-
-  const nPropertyDescription = convertStringProperty("n", obj.n);
-
-  let values;
-  if (isStringPropertyDescription(nPropertyDescription)) {
-    values = { n: nPropertyDescription.valueDescription.value };
-  } else {
-    values = { n: nPropertyDescription.valueDescription.stringTemplate };
-  }
+  const fixedCountArg = { name: "count", type: ArgType.Number };
+  const argMap = new Map<string, Arg>([[fixedCountArg.name, fixedCountArg]]);
+  const values = getPluralFunctionValues(obj.n);
 
   const keys = Object.keys(obj);
   for (const key of keys) {
@@ -68,14 +42,14 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
       continue;
     }
 
-    const propertyDescription = convertStringProperty(key, obj[key]);
+    const valueDescription = convertString(obj[key]);
 
-    if (isStringPropertyDescription(propertyDescription)) {
-      values[key] = propertyDescription.valueDescription.value;
+    if (isStringValueDescription(valueDescription)) {
+      values[key] = valueDescription.value;
       continue;
     }
 
-    for (const arg of propertyDescription.valueDescription.args) {
+    for (const arg of valueDescription.args) {
       if (argMap.has(arg.name)) {
         continue;
       }
@@ -83,81 +57,75 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
       argMap.set(arg.name, arg);
     }
 
-    values[key] = propertyDescription.valueDescription.stringTemplate;
+    values[key] = valueDescription.stringTemplate;
   }
 
   return {
+    type: ValueType.PluralFunction,
     args: Array.from(argMap.values()),
     values
   };
 }
 
-function convertObject(obj: {}): ObjectValueDescription {
+function getPluralFunctionValues(nValue: string) {
+  const nValueDescription = convertString(nValue);
+
+  return isStringValueDescription(nValueDescription)
+    ? { n: nValueDescription.value }
+    : { n: nValueDescription.stringTemplate };
+}
+
+function convertSimpleObject(obj: {}): ObjectValueDescription {
+  const propertyDescriptions = new Map<string, ValueDescription>();
   const keys = Object.keys(obj);
 
-  const propertyDescriptions = keys.map((key) => {
+  for (const key of keys) {
     const value = obj[key];
     const valueType = typeof value;
 
     if (valueType === "string") {
-      return convertStringProperty(key, value);
+      propertyDescriptions.set(key, convertString(value));
+      continue;
     }
 
     // ignore arrays for the moment
     if (valueType === "object" && !Array.isArray(value)) {
-      return convertObjectProperty(key, value);
+      propertyDescriptions.set(key, convertObject(value));
+      continue;
     }
 
-    return convertNoneStringProperty(key, value);
-  });
+    propertyDescriptions.set(key, convertNoneString(value));
+  }
 
   return {
+    type: ValueType.Object,
     propertyDescriptions
   };
 }
 
-function convertNoneStringProperty(key: string, value: number | boolean | JsonType[]): NoneStringPropertyDescription {
+function convertNoneString(value: number | boolean | JsonType[]): NoneStringValueDescription {
   return {
-    type: PropertyType.NoneString,
-    key,
-    valueDescription: convertNoneStringValue(value)
-  };
-}
-
-function convertNoneStringValue(value: number | boolean | JsonType[]): NoneStringValueDescription {
-  return {
+    type: ValueType.NoneString,
     value
   };
 }
 
-function convertStringProperty(
-  key: string,
-  value: string
-): StringPropertyDescription | PlaceholderFunctionPropertyDescription {
+function convertString(value: string) {
   const placeholderMatches = Array.from(getAllMatches(value, placeholderRegex));
 
-  if (placeholderMatches.length === 0) {
-    return {
-      type: PropertyType.String,
-      key,
-      valueDescription: convertStringValue(value)
-    };
-  }
-
-  return {
-    type: PropertyType.PlaceholderFunction,
-    key,
-    valueDescription: convertStringValueToPlaceholderFunction(value, placeholderMatches)
-  };
+  return placeholderMatches.length === 0
+    ? convertSimpleString(value)
+    : convertStringToPlaceholderFunction(value, placeholderMatches);
 }
 
-function convertStringValue(value: string): StringValueDescription {
+function convertSimpleString(value: string): StringValueDescription {
   return {
+    type: ValueType.String,
     value
   };
 }
 
-function convertStringValueToPlaceholderFunction(
+function convertStringToPlaceholderFunction(
   value: string,
   placeholderMatches: RegExpExecArray[]
 ): PlaceholderFunctionValueDescription {
@@ -189,6 +157,7 @@ function convertStringValueToPlaceholderFunction(
   }
 
   return {
+    type: ValueType.PlaceholderFunction,
     args: Array.from(argMap.values()),
     stringTemplate
   };

@@ -1,39 +1,25 @@
 export type JsonType = string | number | object | boolean;
 
-export enum PropertyType {
+export enum ValueType {
   NoneString,
   String,
   PlaceholderFunction,
   Object,
-  PluralFormObject
+  PluralFunction
 }
 
-export interface PropertyDescription<TValueDescription = {}> {
-  type: PropertyType;
-  key: string;
-  valueDescription: TValueDescription;
+export interface ValueDescription {
+  type: ValueType;
 }
 
-export interface StringValueDescription {
-  value: string;
-}
-
-export interface StringPropertyDescription extends PropertyDescription<StringValueDescription> {
-  type: PropertyType.String;
-}
-
-export function isStringPropertyDescription(
-  propertyDescription: PropertyDescription
-): propertyDescription is StringPropertyDescription {
-  return propertyDescription.type === PropertyType.String;
-}
-
-export interface NoneStringValueDescription {
+export interface NoneStringValueDescription extends ValueDescription {
+  type: ValueType.NoneString;
   value: boolean | number | JsonType[];
 }
 
-export interface NoneStringPropertyDescription extends PropertyDescription<NoneStringValueDescription> {
-  type: PropertyType.NoneString;
+export interface StringValueDescription extends ValueDescription {
+  type: ValueType.String;
+  value: string;
 }
 
 export enum ArgType {
@@ -49,22 +35,15 @@ export interface Arg {
 
 export type StringTemplate = Array<string | Arg>;
 
-export interface PlaceholderFunctionValueDescription {
+export interface PlaceholderFunctionValueDescription extends ValueDescription {
+  type: ValueType.PlaceholderFunction;
   args: Arg[];
   stringTemplate: StringTemplate;
 }
 
-export interface PlaceholderFunctionPropertyDescription
-  extends PropertyDescription<PlaceholderFunctionValueDescription> {
-  type: PropertyType.PlaceholderFunction;
-}
-
-export interface ObjectValueDescription {
-  propertyDescriptions: PropertyDescription[];
-}
-
-export interface ObjectPropertyDescription extends PropertyDescription<ObjectValueDescription> {
-  type: PropertyType.Object;
+export interface ObjectValueDescription extends ValueDescription {
+  type: ValueType.Object;
+  propertyDescriptions: Map<string, ValueDescription>;
 }
 
 export interface PluralFormObjectDescription {
@@ -72,13 +51,10 @@ export interface PluralFormObjectDescription {
   n: StringTemplate | string;
 }
 
-export interface PluralFunctionValueDescription {
+export interface PluralFunctionValueDescription extends ValueDescription {
+  type: ValueType.PluralFunction;
   args: Arg[];
   values: PluralFormObjectDescription;
-}
-
-export interface PluralFormObjectPropertyDescription extends PropertyDescription<PluralFunctionValueDescription> {
-  type: PropertyType.PluralFormObject;
 }
 
 const reverseArgType = new Map(Object.keys(ArgType).map((argTypeKey) => [ArgType[argTypeKey], argTypeKey]));
@@ -87,4 +63,34 @@ export function getTypeFrom(typeName: string): ArgType {
   const argTypeKey = reverseArgType.get(typeName);
 
   return argTypeKey !== undefined ? ArgType[argTypeKey] : ArgType.String;
+}
+
+export function isNoneStringValueDescription(
+  valueDescription: ValueDescription
+): valueDescription is NoneStringValueDescription {
+  return valueDescription.type === ValueType.NoneString;
+}
+
+export function isStringValueDescription(
+  valueDescription: ValueDescription
+): valueDescription is StringValueDescription {
+  return valueDescription.type === ValueType.String;
+}
+
+export function isPlaceholderFunctionValueDescription(
+  valueDescription: ValueDescription
+): valueDescription is PlaceholderFunctionValueDescription {
+  return valueDescription.type === ValueType.PlaceholderFunction;
+}
+
+export function isObjectValueDescription(
+  valueDescription: ValueDescription
+): valueDescription is ObjectValueDescription {
+  return valueDescription.type === ValueType.Object;
+}
+
+export function isPluralFunctionValueDescription(
+  valueDescription: ValueDescription
+): valueDescription is PluralFunctionValueDescription {
+  return valueDescription.type === ValueType.PluralFunction;
 }

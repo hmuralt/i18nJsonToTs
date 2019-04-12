@@ -1,10 +1,12 @@
 import { convertJson } from "../src/JsonConversion";
 import {
-  PropertyType,
   ArgType,
-  PlaceholderFunctionPropertyDescription,
-  ObjectPropertyDescription,
-  PluralFormObjectPropertyDescription
+  isObjectValueDescription,
+  ValueDescription,
+  isNoneStringValueDescription,
+  isStringValueDescription,
+  isPlaceholderFunctionValueDescription,
+  isPluralFunctionValueDescription
 } from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
@@ -19,14 +21,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.NoneString);
-        expect(result.key).toBe(testPropertyName);
-        expect(result.valueDescription).toEqual({
-          value: testPropertyValue
-        });
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const noneStringValueDescription = getAs(
+          isNoneStringValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(noneStringValueDescription.value).toEqual(testPropertyValue);
       }
 
       it("converts boolean property to NoneStringPropertyDescription", () => noneStringPropertyDescriptionTest(true));
@@ -45,14 +48,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.String);
-        expect(result.key).toBe(testPropertyName);
-        expect(result.valueDescription).toEqual({
-          value: testPropertyValue
-        });
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const stringValueDescription = getAs(
+          isStringValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(stringValueDescription.value).toEqual(testPropertyValue);
       });
 
       it("converts string with placeholders to PlaceholderFunctionValueDescription", () => {
@@ -66,27 +70,28 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.PlaceholderFunction);
-        expect(result.key).toBe(testPropertyName);
-        expect(result.valueDescription).toEqual({
-          args: [
-            {
-              name: testPlaceholderName,
-              type: ArgType.String
-            }
-          ],
-          stringTemplate: [
-            "This is a test with a ",
-            {
-              name: testPlaceholderName,
-              type: ArgType.String
-            },
-            " placeholder."
-          ]
-        });
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const placeholderFunctionValueDescription = getAs(
+          isPlaceholderFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(placeholderFunctionValueDescription.args).toEqual([
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          }
+        ]);
+        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
+          "This is a test with a ",
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          },
+          " placeholder."
+        ]);
       });
 
       it("converts string with placeholders at the start to correct string template", () => {
@@ -100,11 +105,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject))
-          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.valueDescription.stringTemplate).toEqual([
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const placeholderFunctionValueDescription = getAs(
+          isPlaceholderFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
           {
             name: testPlaceholderName,
             type: ArgType.String
@@ -124,11 +133,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject))
-          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.valueDescription.stringTemplate).toEqual([
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const placeholderFunctionValueDescription = getAs(
+          isPlaceholderFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
           "it begins with ",
           {
             name: testPlaceholderName,
@@ -148,24 +161,26 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject))
-          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.valueDescription).toEqual({
-          args: [
-            {
-              name: testPlaceholderName,
-              type: ArgType.String
-            }
-          ],
-          stringTemplate: [
-            {
-              name: testPlaceholderName,
-              type: ArgType.String
-            }
-          ]
-        });
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const placeholderFunctionValueDescription = getAs(
+          isPlaceholderFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(placeholderFunctionValueDescription.args).toEqual([
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          }
+        ]);
+        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
+          {
+            name: testPlaceholderName,
+            type: ArgType.String
+          }
+        ]);
       });
 
       it("lists a placeholder appearing multiple times in string just once", () => {
@@ -179,12 +194,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject))
-          .propertyDescriptions[0] as PlaceholderFunctionPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.PlaceholderFunction);
-        expect(result.valueDescription.args).toEqual([
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const placeholderFunctionValueDescription = getAs(
+          isPlaceholderFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(placeholderFunctionValueDescription.args).toEqual([
           {
             name: testPlaceholderName,
             type: ArgType.String
@@ -203,14 +221,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0];
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.Object);
-        expect(result.key).toBe(testPropertyName);
-        expect(result.valueDescription).toEqual({
-          propertyDescriptions: []
-        });
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const innerObjectValueDescription = getAs(
+          isObjectValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(innerObjectValueDescription.propertyDescriptions).toEqual(new Map());
       });
 
       it("converts properties of the object", () => {
@@ -226,13 +245,19 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject)).propertyDescriptions[0] as ObjectPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.Object);
-        expect(result.key).toBe(testPropertyName);
-        expect(result.valueDescription.propertyDescriptions[0].type).toEqual(PropertyType.String);
-        expect(result.valueDescription.propertyDescriptions[0].key).toEqual(testInnerPropertyName);
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const innerObjectValueDescription = getAs(
+          isObjectValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        const innerStringValueDescription = getAs(
+          isStringValueDescription,
+          innerObjectValueDescription.propertyDescriptions.get(testInnerPropertyName)
+        );
+        expect(innerStringValueDescription.value).toEqual(testInnerPropertyValue);
       });
 
       it("converts plural form objects to PluralFormObjectPropertyDescription", () => {
@@ -248,30 +273,30 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject))
-          .propertyDescriptions[0] as PluralFormObjectPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.type).toBe(PropertyType.PluralFormObject);
-        expect(result.key).toBe(testPropertyName);
-        expect(result.valueDescription).toEqual({
-          args: [
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const pluralFunctionValueDescription = getAs(
+          isPluralFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(pluralFunctionValueDescription.args).toEqual([
+          {
+            name: "count",
+            type: "number"
+          }
+        ]);
+        expect(pluralFunctionValueDescription.values).toEqual({
+          0: "No tests",
+          1: "One test",
+          n: [
             {
               name: "count",
-              type: "number"
-            }
-          ],
-          values: {
-            0: "No tests",
-            1: "One test",
-            n: [
-              {
-                name: "count",
-                type: ArgType.Number
-              },
-              " tests"
-            ]
-          }
+              type: ArgType.Number
+            },
+            " tests"
+          ]
         });
       });
 
@@ -288,11 +313,15 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject))
-          .propertyDescriptions[0] as PluralFormObjectPropertyDescription;
+        const result = convertJson(JSON.stringify(testJsonObject));
 
         // Assert
-        expect(result.valueDescription.args).toEqual([
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const pluralFunctionValueDescription = getAs(
+          isPluralFunctionValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(pluralFunctionValueDescription.args).toEqual([
           {
             name: "count",
             type: "number"
@@ -310,3 +339,18 @@ describe("JsonConversion", () => {
     });
   });
 });
+
+function getAs<TValueDescription extends ValueDescription>(
+  check: (v: ValueDescription) => v is TValueDescription,
+  valueDescription: ValueDescription | undefined
+): TValueDescription {
+  if (valueDescription === undefined) {
+    throw Error("valueDescription is undefined");
+  }
+
+  if (!check(valueDescription)) {
+    throw Error("Passed valueDescription is not of expected type");
+  }
+
+  return valueDescription;
+}
