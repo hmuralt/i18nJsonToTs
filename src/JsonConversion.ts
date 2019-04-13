@@ -14,16 +14,18 @@ import {
   ValueType
 } from "./IntermediateStructure";
 import { getAllMatches } from "./RegexUtils";
+import { pluralFormNthKey } from "./Configuration";
 
 interface PluralFormObject {
   [count: number]: string;
-  n: string;
+  [pluralFormNthKey]: string;
 }
 
 const placeholderRegex = /(?<!\\){\s*([^:\s]+)\s*:\s*([^}\s]+)\s*(?<!\\)}/gm;
 
 export function convertJson(jsonString: string) {
   const json = JSON.parse(jsonString);
+
   return convertObject(json);
 }
 
@@ -33,15 +35,11 @@ function convertObject(value: {}): ObjectValueDescription | PluralFunctionValueD
 
 function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDescription {
   const fixedCountArg = { name: "count", type: ArgType.Number };
-  const argMap = new Map<string, Arg>([[fixedCountArg.name, fixedCountArg]]);
-  const values = getPluralFunctionValues(obj.n);
+  const argSet = createArgSet([fixedCountArg]);
+  const values = getPluralFunctionValues(obj[pluralFormNthKey]);
 
-  const keys = Object.keys(obj);
+  const keys = Object.keys(obj).filter((key) => key !== pluralFormNthKey);
   for (const key of keys) {
-    if (key === "n") {
-      continue;
-    }
-
     const valueDescription = convertString(obj[key]);
 
     if (isStringValueDescription(valueDescription)) {
@@ -50,11 +48,7 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
     }
 
     for (const arg of valueDescription.args) {
-      if (argMap.has(arg.name)) {
-        continue;
-      }
-
-      argMap.set(arg.name, arg);
+      argSet.add(arg);
     }
 
     values[key] = valueDescription.stringTemplate;
@@ -62,17 +56,17 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
 
   return {
     type: ValueType.PluralFunction,
-    args: Array.from(argMap.values()),
+    args: argSet.args,
     values
   };
 }
 
-function getPluralFunctionValues(nValue: string) {
-  const nValueDescription = convertString(nValue);
+function getPluralFunctionValues(nthValue: string) {
+  const nthValueDescription = convertString(nthValue);
 
-  return isStringValueDescription(nValueDescription)
-    ? { n: nValueDescription.value }
-    : { n: nValueDescription.stringTemplate };
+  return isStringValueDescription(nthValueDescription)
+    ? { n: nthValueDescription.value }
+    : { n: nthValueDescription.stringTemplate };
 }
 
 function convertSimpleObject(obj: {}): ObjectValueDescription {
@@ -129,7 +123,7 @@ function convertStringToPlaceholderFunction(
   value: string,
   placeholderMatches: RegExpExecArray[]
 ): PlaceholderFunctionValueDescription {
-  const argMap = new Map<string, Arg>();
+  const argSet = createArgSet();
   const stringTemplate: StringTemplate = [];
 
   let processedValue = value;
@@ -139,14 +133,12 @@ function convertStringToPlaceholderFunction(
       type: getTypeFrom(placeholderMatch[2])
     };
 
-    if (!argMap.has(arg.name)) {
-      argMap.set(arg.name, arg);
-    }
+    argSet.add(arg);
 
-    const splittedValue = processedValue.split(placeholderMatch[0]);
-    processedValue = splittedValue[1];
-    if (splittedValue[0] !== "") {
-      stringTemplate.push(splittedValue[0]);
+    const splitValue = processedValue.split(placeholderMatch[0]);
+    processedValue = splitValue[1];
+    if (splitValue[0] !== "") {
+      stringTemplate.push(splitValue[0]);
     }
 
     stringTemplate.push(arg);
@@ -158,14 +150,31 @@ function convertStringToPlaceholderFunction(
 
   return {
     type: ValueType.PlaceholderFunction,
-    args: Array.from(argMap.values()),
+    args: argSet.args,
     stringTemplate
   };
 }
 
-function isPluralFormObject(obj: { n?: string }): obj is PluralFormObject {
+function isPluralFormObject(obj: { [pluralFormNthKey]?: string }): obj is PluralFormObject {
   return (
-    obj.n !== undefined &&
-    Object.keys(obj).every((key) => (key === "n" || /^\d+$/.test(key)) && typeof obj[key] === "string")
+    obj[pluralFormNthKey] !== undefined &&
+    Object.keys(obj).every((key) => (key === pluralFormNthKey || /^\d+$/.test(key)) && typeof obj[key] === "string")
   );
+}
+
+function createArgSet(initialArgs: Arg[] = []) {
+  const argMap = new Map<string, Arg>(initialArgs.map((initialArg) => [initialArg.name, initialArg]));
+
+  return {
+    add(arg: Arg) {
+      if (argMap.has(arg.name)) {
+        return;
+      }
+
+      argMap.set(arg.name, arg);
+    },
+    get args() {
+      return Array.from(argMap.values());
+    }
+  };
 }

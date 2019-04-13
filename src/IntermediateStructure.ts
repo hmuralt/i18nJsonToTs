@@ -1,3 +1,5 @@
+import { pluralFormNthKey } from "./Configuration";
+
 export type JsonType = string | number | object | boolean;
 
 export enum ValueType {
@@ -48,7 +50,7 @@ export interface ObjectValueDescription extends ValueDescription {
 
 export interface PluralFormObjectDescription {
   [count: number]: StringTemplate | string;
-  n: StringTemplate | string;
+  [pluralFormNthKey]: StringTemplate | string;
 }
 
 export interface PluralFunctionValueDescription extends ValueDescription {
