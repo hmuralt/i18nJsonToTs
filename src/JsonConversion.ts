@@ -6,7 +6,6 @@ import {
   StringTemplate,
   getTypeFrom,
   Arg,
-  JsonType,
   PluralFunctionValueDescription,
   ArgType,
   isStringValueDescription,
@@ -14,14 +13,8 @@ import {
   ValueType
 } from "./IntermediateStructure";
 import { getAllMatches } from "./RegexUtils";
-import { pluralFormNthKey } from "./Configuration";
-
-interface PluralFormObject {
-  [count: number]: string;
-  [pluralFormNthKey]: string;
-}
-
-const placeholderRegex = /(?<!\\){\s*([^:\s]+)\s*:\s*([^}\s]+)\s*(?<!\\)}/gm;
+import { pluralFormNthKey, placeholderRegex } from "./Configuration";
+import { NoneStringJsonType, PluralFormObject } from "./JsonStructure";
 
 export function convertJson(jsonString: string) {
   const json = JSON.parse(jsonString);
@@ -97,7 +90,7 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
   };
 }
 
-function convertNoneString(value: number | boolean | JsonType[]): NoneStringValueDescription {
+function convertNoneString(value: NoneStringJsonType): NoneStringValueDescription {
   return {
     type: ValueType.NoneString,
     value
@@ -124,9 +117,8 @@ function convertStringToPlaceholderFunction(
   placeholderMatches: RegExpExecArray[]
 ): PlaceholderFunctionValueDescription {
   const argSet = createArgSet();
-  const stringTemplate: StringTemplate = [];
+  const stringTemplateBuilder = createStringTemplateBuilder(value);
 
-  let processedValue = value;
   for (const placeholderMatch of placeholderMatches) {
     const arg = {
       name: placeholderMatch[1],
@@ -134,24 +126,13 @@ function convertStringToPlaceholderFunction(
     };
 
     argSet.add(arg);
-
-    const splitValue = processedValue.split(placeholderMatch[0]);
-    processedValue = splitValue[1];
-    if (splitValue[0] !== "") {
-      stringTemplate.push(splitValue[0]);
-    }
-
-    stringTemplate.push(arg);
-  }
-
-  if (processedValue !== "") {
-    stringTemplate.push(processedValue);
+    stringTemplateBuilder.add(arg, placeholderMatch[0]);
   }
 
   return {
     type: ValueType.PlaceholderFunction,
     args: argSet.args,
-    stringTemplate
+    stringTemplate: stringTemplateBuilder.stringTemplate
   };
 }
 
@@ -175,6 +156,31 @@ function createArgSet(initialArgs: Arg[] = []) {
     },
     get args() {
       return Array.from(argMap.values());
+    }
+  };
+}
+
+function createStringTemplateBuilder(value: string) {
+  const stringTemplate: StringTemplate = [];
+  let unprocessedValue = value;
+
+  return {
+    add(arg: Arg, argStringMatch: string) {
+      const splitValue = unprocessedValue.split(argStringMatch);
+      unprocessedValue = splitValue[1];
+
+      if (splitValue[0] !== "") {
+        stringTemplate.push(splitValue[0]);
+      }
+
+      stringTemplate.push(arg);
+    },
+    get stringTemplate() {
+      if (unprocessedValue !== "") {
+        stringTemplate.push(unprocessedValue);
+      }
+
+      return stringTemplate;
     }
   };
 }

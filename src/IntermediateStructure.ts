@@ -1,6 +1,5 @@
 import { pluralFormNthKey } from "./Configuration";
-
-export type JsonType = string | number | object | boolean;
+import { NoneStringJsonType } from "./JsonStructure";
 
 export enum ValueType {
   NoneString,
@@ -16,7 +15,7 @@ export interface ValueDescription {
 
 export interface NoneStringValueDescription extends ValueDescription {
   type: ValueType.NoneString;
-  value: boolean | number | JsonType[];
+  value: NoneStringJsonType;
 }
 
 export interface StringValueDescription extends ValueDescription {
