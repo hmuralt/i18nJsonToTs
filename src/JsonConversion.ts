@@ -10,7 +10,7 @@ import {
   ArgType,
   isStringValueDescription,
   ValueDescription,
-  ValueType
+  ValueDescriptionType
 } from "./IntermediateStructure";
 import { getAllMatches } from "./RegexUtils";
 import { pluralFormNthKey, placeholderRegex } from "./Configuration";
@@ -48,7 +48,7 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
   }
 
   return {
-    type: ValueType.PluralFunction,
+    type: ValueDescriptionType.PluralFunction,
     args: argSet.args,
     values
   };
@@ -83,14 +83,14 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
   }
 
   return {
-    type: ValueType.Object,
+    type: ValueDescriptionType.Object,
     propertyDescriptions
   };
 }
 
 function convertNoneString(value: NoneStringJsonType): NoneStringValueDescription {
   return {
-    type: ValueType.NoneString,
+    type: ValueDescriptionType.NoneString,
     value
   };
 }
@@ -105,7 +105,7 @@ function convertString(value: string) {
 
 function convertSimpleString(value: string): StringValueDescription {
   return {
-    type: ValueType.String,
+    type: ValueDescriptionType.String,
     value
   };
 }
@@ -128,7 +128,7 @@ function convertStringToPlaceholderFunction(
   }
 
   return {
-    type: ValueType.PlaceholderFunction,
+    type: ValueDescriptionType.PlaceholderFunction,
     args: argSet.args,
     stringTemplate: stringTemplateBuilder.stringTemplate
   };

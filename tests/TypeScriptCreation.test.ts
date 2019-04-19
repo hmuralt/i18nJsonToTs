@@ -1,16 +1,16 @@
 import { isObjectLiteralExpression, isPropertyAssignment, Identifier } from "typescript";
 import { createObject } from "../src/TypeScriptCreation";
-import { ObjectValueDescription, ValueType } from "../src/IntermediateStructure";
+import { ObjectValueDescription, ValueDescriptionType } from "../src/IntermediateStructure";
 
 describe("TypeScriptCreation", () => {
   describe("createObject", () => {
     it("returns object literal expression", () => {
       // Arrange
       const testObjectDescription: ObjectValueDescription = {
-        type: ValueType.Object,
+        type: ValueDescriptionType.Object,
         propertyDescriptions: new Map([
-          ["testKey1", { type: ValueType.NoneString, value: true }],
-          ["testKey2", { type: ValueType.String, value: "Simple string" }]
+          ["testKey1", { type: ValueDescriptionType.NoneString, value: true }],
+          ["testKey2", { type: ValueDescriptionType.String, value: "Simple string" }]
         ])
       };
 
@@ -26,10 +26,10 @@ describe("TypeScriptCreation", () => {
       const testKey1 = "testKey1";
       const testKey2 = "testKey2";
       const testObjectDescription: ObjectValueDescription = {
-        type: ValueType.Object,
+        type: ValueDescriptionType.Object,
         propertyDescriptions: new Map([
-          [testKey1, { type: ValueType.NoneString, value: true }],
-          [testKey2, { type: ValueType.String, value: "Simple string" }]
+          [testKey1, { type: ValueDescriptionType.NoneString, value: true }],
+          [testKey2, { type: ValueDescriptionType.String, value: "Simple string" }]
         ])
       };
 
@@ -49,10 +49,10 @@ describe("TypeScriptCreation", () => {
     it("returns object literal expression", () => {
       // Arrange
       const testObjectDescription: ObjectValueDescription = {
-        type: ValueType.Object,
+        type: ValueDescriptionType.Object,
         propertyDescriptions: new Map([
-          ["testKey1", { type: ValueType.NoneString, value: true }],
-          ["testKey2", { type: ValueType.String, value: "Simple string" }]
+          ["testKey1", { type: ValueDescriptionType.NoneString, value: true }],
+          ["testKey2", { type: ValueDescriptionType.String, value: "Simple string" }]
         ])
       };
 

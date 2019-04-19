@@ -1,7 +1,7 @@
 import { pluralFormNthKey } from "./Configuration";
 import { NoneStringJsonType } from "./JsonStructure";
 
-export enum ValueType {
+export enum ValueDescriptionType {
   NoneString,
   String,
   PlaceholderFunction,
@@ -10,16 +10,16 @@ export enum ValueType {
 }
 
 export interface ValueDescription {
-  type: ValueType;
+  type: ValueDescriptionType;
 }
 
 export interface NoneStringValueDescription extends ValueDescription {
-  type: ValueType.NoneString;
+  type: ValueDescriptionType.NoneString;
   value: NoneStringJsonType;
 }
 
 export interface StringValueDescription extends ValueDescription {
-  type: ValueType.String;
+  type: ValueDescriptionType.String;
   value: string;
 }
 
@@ -37,13 +37,13 @@ export interface Arg {
 export type StringTemplate = Array<string | Arg>;
 
 export interface PlaceholderFunctionValueDescription extends ValueDescription {
-  type: ValueType.PlaceholderFunction;
+  type: ValueDescriptionType.PlaceholderFunction;
   args: Arg[];
   stringTemplate: StringTemplate;
 }
 
 export interface ObjectValueDescription extends ValueDescription {
-  type: ValueType.Object;
+  type: ValueDescriptionType.Object;
   propertyDescriptions: Map<string, ValueDescription>;
 }
 
@@ -53,7 +53,7 @@ export interface PluralFormObjectDescription {
 }
 
 export interface PluralFunctionValueDescription extends ValueDescription {
-  type: ValueType.PluralFunction;
+  type: ValueDescriptionType.PluralFunction;
   args: Arg[];
   values: PluralFormObjectDescription;
 }
@@ -69,29 +69,29 @@ export function getTypeFrom(typeName: string): ArgType {
 export function isNoneStringValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is NoneStringValueDescription {
-  return valueDescription.type === ValueType.NoneString;
+  return valueDescription.type === ValueDescriptionType.NoneString;
 }
 
 export function isStringValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is StringValueDescription {
-  return valueDescription.type === ValueType.String;
+  return valueDescription.type === ValueDescriptionType.String;
 }
 
 export function isPlaceholderFunctionValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is PlaceholderFunctionValueDescription {
-  return valueDescription.type === ValueType.PlaceholderFunction;
+  return valueDescription.type === ValueDescriptionType.PlaceholderFunction;
 }
 
 export function isObjectValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is ObjectValueDescription {
-  return valueDescription.type === ValueType.Object;
+  return valueDescription.type === ValueDescriptionType.Object;
 }
 
 export function isPluralFunctionValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is PluralFunctionValueDescription {
-  return valueDescription.type === ValueType.PluralFunction;
+  return valueDescription.type === ValueDescriptionType.PluralFunction;
 }
