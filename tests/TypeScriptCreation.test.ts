@@ -9,8 +9,8 @@ describe("TypeScriptCreation", () => {
       const testObjectDescription: ObjectValueDescription = {
         type: ValueDescriptionType.Object,
         propertyDescriptions: new Map([
-          ["testKey1", { type: ValueDescriptionType.NoneString, value: true }],
-          ["testKey2", { type: ValueDescriptionType.String, value: "Simple string" }]
+          ["testKey1", { type: ValueDescriptionType.Primitive, value: true }],
+          ["testKey2", { type: ValueDescriptionType.Primitive, value: "Simple string" }]
         ])
       };
 
@@ -28,8 +28,8 @@ describe("TypeScriptCreation", () => {
       const testObjectDescription: ObjectValueDescription = {
         type: ValueDescriptionType.Object,
         propertyDescriptions: new Map([
-          [testKey1, { type: ValueDescriptionType.NoneString, value: true }],
-          [testKey2, { type: ValueDescriptionType.String, value: "Simple string" }]
+          [testKey1, { type: ValueDescriptionType.Primitive, value: true }],
+          [testKey2, { type: ValueDescriptionType.Primitive, value: "Simple string" }]
         ])
       };
 
@@ -51,8 +51,8 @@ describe("TypeScriptCreation", () => {
       const testObjectDescription: ObjectValueDescription = {
         type: ValueDescriptionType.Object,
         propertyDescriptions: new Map([
-          ["testKey1", { type: ValueDescriptionType.NoneString, value: true }],
-          ["testKey2", { type: ValueDescriptionType.String, value: "Simple string" }]
+          ["testKey1", { type: ValueDescriptionType.Primitive, value: true }],
+          ["testKey2", { type: ValueDescriptionType.Primitive, value: "Simple string" }]
         ])
       };
 
