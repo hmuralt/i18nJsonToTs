@@ -13,7 +13,7 @@ describe("JsonConversion", () => {
   describe("convertJson", () => {
     describe("when converting none string properties", () => {
       // tslint:disable-next-line: no-any
-      function noneStringPropertyDescriptionTest(testPropertyValue: any) {
+      function noneStringValueDescriptionTest(testPropertyValue: any) {
         // Arrange
         const testPropertyName = "myNoneStringProp";
         const testJsonObject = {
@@ -32,14 +32,13 @@ describe("JsonConversion", () => {
         expect(noneStringValueDescription.value).toEqual(testPropertyValue);
       }
 
-      it("converts boolean property to NoneStringPropertyDescription", () => noneStringPropertyDescriptionTest(true));
-      it("converts number property to NoneStringPropertyDescription", () => noneStringPropertyDescriptionTest(23236));
-      it("converts array property to NoneStringPropertyDescription", () =>
-        noneStringPropertyDescriptionTest([3, 7, 8]));
+      it("converts boolean property to NoneStringValueDescription", () => noneStringValueDescriptionTest(true));
+      it("converts number property to NoneStringValueDescription", () => noneStringValueDescriptionTest(23236));
+      it("converts array property to NoneStringValueDescription", () => noneStringValueDescriptionTest([3, 7, 8]));
     });
 
     describe("when converting string properties", () => {
-      it("converts simple string to StringPropertyDescription", () => {
+      it("converts simple string to StringValueDescription", () => {
         // Arrange
         const testPropertyName = "myStringProp";
         const testPropertyValue = "This is a test value";
@@ -212,7 +211,7 @@ describe("JsonConversion", () => {
     });
 
     describe("when converting object properties", () => {
-      it("converts to ObjectPropertyDescription", () => {
+      it("converts to ObjectValueDescription", () => {
         // Arrange
         const testPropertyName = "myObjectProp";
         const testPropertyValue = {};
@@ -260,7 +259,7 @@ describe("JsonConversion", () => {
         expect(innerStringValueDescription.value).toEqual(testInnerPropertyValue);
       });
 
-      it("converts plural form objects to PluralFormObjectPropertyDescription", () => {
+      it("converts plural form objects to PluralFunctionValueDescription", () => {
         // Arrange
         const testPropertyName = "myObjectProp";
         const testPropertyValue = {
