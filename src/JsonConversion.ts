@@ -69,19 +69,17 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
   for (const key of keys) {
     const value = obj[key];
     const valueType = typeof value;
+    let valueDescription;
 
     if (valueType === "string") {
-      propertyDescriptions.set(key, convertString(value));
-      continue;
+      valueDescription = convertString(value);
+    } else if (valueType === "object" && !Array.isArray(value)) {
+      valueDescription = convertObject(value);
+    } else {
+      valueDescription = convertNoneString(value);
     }
 
-    // ignore arrays for the moment
-    if (valueType === "object" && !Array.isArray(value)) {
-      propertyDescriptions.set(key, convertObject(value));
-      continue;
-    }
-
-    propertyDescriptions.set(key, convertNoneString(value));
+    propertyDescriptions.set(key, valueDescription);
   }
 
   return {
