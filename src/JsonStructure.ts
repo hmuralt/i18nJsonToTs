@@ -1,8 +1,6 @@
 import { pluralFormNthKey } from "./Configuration";
 
-export type JsonType = boolean | number | string | object;
-
-export type NoneStringJsonType = boolean | number | JsonType[];
+export type PrimitiveJsonType = boolean | number | string;
 
 export interface PluralFormObject {
   [count: number]: string;

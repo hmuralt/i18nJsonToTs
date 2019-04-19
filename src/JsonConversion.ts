@@ -1,20 +1,21 @@
 import {
   ObjectValueDescription,
-  NoneStringValueDescription,
-  StringValueDescription,
   PlaceholderFunctionValueDescription,
   StringTemplate,
   getTypeFrom,
   Arg,
   PluralFunctionValueDescription,
   ArgType,
-  isStringValueDescription,
   ValueDescription,
-  ValueDescriptionType
+  ValueDescriptionType,
+  isPrimitiveValueDescription,
+  PrimitiveValueDescription,
+  isPrimitiveStringValueDescription,
+  ArrayValueDescription
 } from "./IntermediateStructure";
 import { getAllMatches } from "./RegexUtils";
 import { pluralFormNthKey, placeholderRegex } from "./Configuration";
-import { NoneStringJsonType, PluralFormObject } from "./JsonStructure";
+import { PluralFormObject, PrimitiveJsonType } from "./JsonStructure";
 
 export function convertJson(jsonString: string) {
   const json = JSON.parse(jsonString);
@@ -35,7 +36,7 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
   for (const key of keys) {
     const valueDescription = convertString(obj[key]);
 
-    if (isStringValueDescription(valueDescription)) {
+    if (isPrimitiveStringValueDescription(valueDescription)) {
       values[key] = valueDescription.value;
       continue;
     }
@@ -57,7 +58,7 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
 function getPluralFunctionValues(nthValue: string) {
   const nthValueDescription = convertString(nthValue);
 
-  return isStringValueDescription(nthValueDescription)
+  return isPrimitiveValueDescription(nthValueDescription)
     ? { n: nthValueDescription.value }
     : { n: nthValueDescription.stringTemplate };
 }
@@ -78,7 +79,7 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
     } else if (valueType === "object") {
       valueDescription = convertObject(value);
     } else {
-      valueDescription = convertNoneString(value);
+      valueDescription = convertPrimitive(value);
     }
 
     propertyDescriptions.set(key, valueDescription);
@@ -91,7 +92,7 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
 }
 
 // tslint:disable-next-line: no-any
-function convertArray(values: any[]) {
+function convertArray(values: any[]): ArrayValueDescription {
   const valueDescriptions: ValueDescription[] = [];
 
   for (const value of values) {
@@ -105,7 +106,7 @@ function convertArray(values: any[]) {
     } else if (valueType === "object") {
       valueDescription = convertObject(value);
     } else {
-      valueDescription = convertNoneString(value);
+      valueDescription = convertPrimitive(value);
     }
 
     valueDescriptions.push(valueDescription);
@@ -117,26 +118,19 @@ function convertArray(values: any[]) {
   };
 }
 
-function convertNoneString(value: NoneStringJsonType): NoneStringValueDescription {
+function convertPrimitive(value: PrimitiveJsonType): PrimitiveValueDescription {
   return {
-    type: ValueDescriptionType.NoneString,
+    type: ValueDescriptionType.Primitive,
     value
   };
 }
 
-function convertString(value: string) {
+function convertString(value: string): PrimitiveValueDescription<string> | PlaceholderFunctionValueDescription {
   const placeholderMatches = Array.from(getAllMatches(value, placeholderRegex));
 
   return placeholderMatches.length === 0
-    ? convertSimpleString(value)
+    ? (convertPrimitive(value) as PrimitiveValueDescription<string>)
     : convertStringToPlaceholderFunction(value, placeholderMatches);
-}
-
-function convertSimpleString(value: string): StringValueDescription {
-  return {
-    type: ValueDescriptionType.String,
-    value
-  };
 }
 
 function convertStringToPlaceholderFunction(

@@ -3,18 +3,18 @@ import {
   ArgType,
   isObjectValueDescription,
   ValueDescription,
-  isNoneStringValueDescription,
-  isStringValueDescription,
+  isPrimitiveStringValueDescription,
   isPlaceholderFunctionValueDescription,
   isPluralFunctionValueDescription,
-  isArrayValueDescription
+  isArrayValueDescription,
+  isPrimitiveValueDescription
 } from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
   describe("convertJson", () => {
-    describe("when converting none string properties", () => {
+    describe("when converting primitive properties", () => {
       // tslint:disable-next-line: no-any
-      function noneStringValueDescriptionTest(testPropertyValue: any) {
+      function primitiveValueDescriptionTest(testPropertyValue: any) {
         // Arrange
         const testPropertyName = "myNoneStringProp";
         const testJsonObject = {
@@ -27,37 +27,18 @@ describe("JsonConversion", () => {
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
         const noneStringValueDescription = getAs(
-          isNoneStringValueDescription,
+          isPrimitiveValueDescription,
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
         expect(noneStringValueDescription.value).toEqual(testPropertyValue);
       }
 
-      it("converts boolean property to NoneStringValueDescription", () => noneStringValueDescriptionTest(true));
-      it("converts number property to NoneStringValueDescription", () => noneStringValueDescriptionTest(23236));
+      it("converts string property to PrimitiveValueDescription", () => primitiveValueDescriptionTest("test string"));
+      it("converts number property to PrimitiveValueDescription", () => primitiveValueDescriptionTest(23236));
+      it("converts boolean property to PrimitiveValueDescription", () => primitiveValueDescriptionTest(true));
     });
 
     describe("when converting string properties", () => {
-      it("converts simple string to StringValueDescription", () => {
-        // Arrange
-        const testPropertyName = "myStringProp";
-        const testPropertyValue = "This is a test value";
-        const testJsonObject = {
-          [testPropertyName]: testPropertyValue
-        };
-
-        // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
-
-        // Assert
-        const objectValueDescription = getAs(isObjectValueDescription, result);
-        const stringValueDescription = getAs(
-          isStringValueDescription,
-          objectValueDescription.propertyDescriptions.get(testPropertyName)
-        );
-        expect(stringValueDescription.value).toEqual(testPropertyValue);
-      });
-
       it("converts string with placeholders to PlaceholderFunctionValueDescription", () => {
         // Arrange
         const testPropertyName = "myStringProp";
@@ -253,7 +234,7 @@ describe("JsonConversion", () => {
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
         const innerStringValueDescription = getAs(
-          isStringValueDescription,
+          isPrimitiveStringValueDescription,
           innerObjectValueDescription.propertyDescriptions.get(testInnerPropertyName)
         );
         expect(innerStringValueDescription.value).toEqual(testInnerPropertyValue);
@@ -377,7 +358,7 @@ describe("JsonConversion", () => {
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
         const innerStringValueDescripiton = getAs(
-          isStringValueDescription,
+          isPrimitiveStringValueDescription,
           innerArrayValueDescription.valueDescriptions[0]
         );
         expect(innerStringValueDescripiton.value).toBe(testValue);

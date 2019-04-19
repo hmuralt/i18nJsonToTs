@@ -1,9 +1,8 @@
 import { pluralFormNthKey } from "./Configuration";
-import { NoneStringJsonType } from "./JsonStructure";
+import { PrimitiveJsonType } from "./JsonStructure";
 
 export enum ValueDescriptionType {
-  NoneString,
-  String,
+  Primitive,
   PlaceholderFunction,
   Object,
   PluralFunction,
@@ -14,14 +13,10 @@ export interface ValueDescription {
   type: ValueDescriptionType;
 }
 
-export interface NoneStringValueDescription extends ValueDescription {
-  type: ValueDescriptionType.NoneString;
-  value: NoneStringJsonType;
-}
-
-export interface StringValueDescription extends ValueDescription {
-  type: ValueDescriptionType.String;
-  value: string;
+export interface PrimitiveValueDescription<TPrimitive extends PrimitiveJsonType = PrimitiveJsonType>
+  extends ValueDescription {
+  type: ValueDescriptionType.Primitive;
+  value: TPrimitive;
 }
 
 export enum ArgType {
@@ -72,16 +67,19 @@ export function getTypeFrom(typeName: string): ArgType {
   return argTypeKey !== undefined ? ArgType[argTypeKey] : ArgType.String;
 }
 
-export function isNoneStringValueDescription(
+export function isPrimitiveValueDescription(
   valueDescription: ValueDescription
-): valueDescription is NoneStringValueDescription {
-  return valueDescription.type === ValueDescriptionType.NoneString;
+): valueDescription is PrimitiveValueDescription {
+  return valueDescription.type === ValueDescriptionType.Primitive;
 }
 
-export function isStringValueDescription(
+export function isPrimitiveStringValueDescription(
   valueDescription: ValueDescription
-): valueDescription is StringValueDescription {
-  return valueDescription.type === ValueDescriptionType.String;
+): valueDescription is PrimitiveValueDescription<string> {
+  return (
+    valueDescription.type === ValueDescriptionType.Primitive &&
+    typeof (valueDescription as PrimitiveValueDescription).value === "string"
+  );
 }
 
 export function isPlaceholderFunctionValueDescription(
