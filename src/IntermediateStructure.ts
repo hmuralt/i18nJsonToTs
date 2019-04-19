@@ -6,7 +6,8 @@ export enum ValueDescriptionType {
   String,
   PlaceholderFunction,
   Object,
-  PluralFunction
+  PluralFunction,
+  Array
 }
 
 export interface ValueDescription {
@@ -58,6 +59,11 @@ export interface PluralFunctionValueDescription extends ValueDescription {
   values: PluralFormObjectDescription;
 }
 
+export interface ArrayValueDescription extends ValueDescription {
+  type: ValueDescriptionType.Array;
+  valueDescriptions: ValueDescription[];
+}
+
 const reverseArgType = new Map(Object.keys(ArgType).map((argTypeKey) => [ArgType[argTypeKey], argTypeKey]));
 
 export function getTypeFrom(typeName: string): ArgType {
@@ -94,4 +100,8 @@ export function isPluralFunctionValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is PluralFunctionValueDescription {
   return valueDescription.type === ValueDescriptionType.PluralFunction;
+}
+
+export function isArrayValueDescription(valueDescription: ValueDescription): valueDescription is ArrayValueDescription {
+  return valueDescription.type === ValueDescriptionType.Array;
 }

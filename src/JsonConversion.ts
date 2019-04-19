@@ -73,7 +73,9 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
 
     if (valueType === "string") {
       valueDescription = convertString(value);
-    } else if (valueType === "object" && !Array.isArray(value)) {
+    } else if (valueType === "object" && Array.isArray(value)) {
+      valueDescription = convertArray(value);
+    } else if (valueType === "object") {
       valueDescription = convertObject(value);
     } else {
       valueDescription = convertNoneString(value);
@@ -85,6 +87,33 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
   return {
     type: ValueDescriptionType.Object,
     propertyDescriptions
+  };
+}
+
+// tslint:disable-next-line: no-any
+function convertArray(values: any[]) {
+  const valueDescriptions: ValueDescription[] = [];
+
+  for (const value of values) {
+    const valueType = typeof value;
+    let valueDescription;
+
+    if (valueType === "string") {
+      valueDescription = convertString(value);
+    } else if (valueType === "object" && Array.isArray(value)) {
+      valueDescription = convertArray(value);
+    } else if (valueType === "object") {
+      valueDescription = convertObject(value);
+    } else {
+      valueDescription = convertNoneString(value);
+    }
+
+    valueDescriptions.push(valueDescription);
+  }
+
+  return {
+    type: ValueDescriptionType.Array,
+    valueDescriptions
   };
 }
 

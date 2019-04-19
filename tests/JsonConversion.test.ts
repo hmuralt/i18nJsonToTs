@@ -6,7 +6,8 @@ import {
   isNoneStringValueDescription,
   isStringValueDescription,
   isPlaceholderFunctionValueDescription,
-  isPluralFunctionValueDescription
+  isPluralFunctionValueDescription,
+  isArrayValueDescription
 } from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
@@ -34,7 +35,6 @@ describe("JsonConversion", () => {
 
       it("converts boolean property to NoneStringValueDescription", () => noneStringValueDescriptionTest(true));
       it("converts number property to NoneStringValueDescription", () => noneStringValueDescriptionTest(23236));
-      it("converts array property to NoneStringValueDescription", () => noneStringValueDescriptionTest([3, 7, 8]));
     });
 
     describe("when converting string properties", () => {
@@ -334,6 +334,53 @@ describe("JsonConversion", () => {
             type: "string"
           }
         ]);
+      });
+    });
+
+    describe("when converting array properties", () => {
+      it("converts to ArrayValueDescription", () => {
+        // Arrange
+        const testPropertyName = "myArrayProp";
+        const testPropertyValue: string[] = [];
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject));
+
+        // Assert
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const innerArrayValueDescription = getAs(
+          isArrayValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        expect(innerArrayValueDescription.valueDescriptions).toEqual([]);
+      });
+
+      it("converts string values", () => {
+        // Arrange
+        const testPropertyName = "myArrayProp";
+        const testValue = "this is a test";
+        const testPropertyValue: string[] = [testValue];
+        const testJsonObject = {
+          [testPropertyName]: testPropertyValue
+        };
+
+        // Act
+        const result = convertJson(JSON.stringify(testJsonObject));
+
+        // Assert
+        const objectValueDescription = getAs(isObjectValueDescription, result);
+        const innerArrayValueDescription = getAs(
+          isArrayValueDescription,
+          objectValueDescription.propertyDescriptions.get(testPropertyName)
+        );
+        const innerStringValueDescripiton = getAs(
+          isStringValueDescription,
+          innerArrayValueDescription.valueDescriptions[0]
+        );
+        expect(innerStringValueDescripiton.value).toBe(testValue);
       });
     });
   });
