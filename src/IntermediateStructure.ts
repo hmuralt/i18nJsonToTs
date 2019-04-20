@@ -3,10 +3,10 @@ import { PrimitiveJsonType } from "./JsonStructure";
 
 export enum ValueDescriptionType {
   Primitive,
-  PlaceholderFunction,
   Object,
-  PluralFunction,
-  Array
+  Array,
+  PlaceholderFunction,
+  PluralFunction
 }
 
 export interface ValueDescription {
@@ -17,6 +17,16 @@ export interface PrimitiveValueDescription<TPrimitive extends PrimitiveJsonType 
   extends ValueDescription {
   type: ValueDescriptionType.Primitive;
   value: TPrimitive;
+}
+
+export interface ObjectValueDescription extends ValueDescription {
+  type: ValueDescriptionType.Object;
+  propertyDescriptions: Map<string, ValueDescription>;
+}
+
+export interface ArrayValueDescription extends ValueDescription {
+  type: ValueDescriptionType.Array;
+  valueDescriptions: ValueDescription[];
 }
 
 export enum ArgType {
@@ -38,11 +48,6 @@ export interface PlaceholderFunctionValueDescription extends ValueDescription {
   stringTemplate: StringTemplate;
 }
 
-export interface ObjectValueDescription extends ValueDescription {
-  type: ValueDescriptionType.Object;
-  propertyDescriptions: Map<string, ValueDescription>;
-}
-
 export interface PluralFormObjectDescription {
   [count: number]: StringTemplate | string;
   [pluralFormNthKey]: StringTemplate | string;
@@ -52,11 +57,6 @@ export interface PluralFunctionValueDescription extends ValueDescription {
   type: ValueDescriptionType.PluralFunction;
   args: Arg[];
   values: PluralFormObjectDescription;
-}
-
-export interface ArrayValueDescription extends ValueDescription {
-  type: ValueDescriptionType.Array;
-  valueDescriptions: ValueDescription[];
 }
 
 const reverseArgType = new Map(Object.keys(ArgType).map((argTypeKey) => [ArgType[argTypeKey], argTypeKey]));
@@ -82,24 +82,24 @@ export function isPrimitiveStringValueDescription(
   );
 }
 
-export function isPlaceholderFunctionValueDescription(
-  valueDescription: ValueDescription
-): valueDescription is PlaceholderFunctionValueDescription {
-  return valueDescription.type === ValueDescriptionType.PlaceholderFunction;
-}
-
 export function isObjectValueDescription(
   valueDescription: ValueDescription
 ): valueDescription is ObjectValueDescription {
   return valueDescription.type === ValueDescriptionType.Object;
 }
 
-export function isPluralFunctionValueDescription(
+export function isPlaceholderFunctionValueDescription(
   valueDescription: ValueDescription
-): valueDescription is PluralFunctionValueDescription {
-  return valueDescription.type === ValueDescriptionType.PluralFunction;
+): valueDescription is PlaceholderFunctionValueDescription {
+  return valueDescription.type === ValueDescriptionType.PlaceholderFunction;
 }
 
 export function isArrayValueDescription(valueDescription: ValueDescription): valueDescription is ArrayValueDescription {
   return valueDescription.type === ValueDescriptionType.Array;
+}
+
+export function isPluralFunctionValueDescription(
+  valueDescription: ValueDescription
+): valueDescription is PluralFunctionValueDescription {
+  return valueDescription.type === ValueDescriptionType.PluralFunction;
 }
