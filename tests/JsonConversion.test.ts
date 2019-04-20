@@ -3,11 +3,11 @@ import {
   ArgType,
   isObjectValueDescription,
   ValueDescription,
-  isPrimitiveStringValueDescription,
   isPlaceholderFunctionValueDescription,
   isPluralFunctionValueDescription,
   isArrayValueDescription,
-  isPrimitiveValueDescription
+  isPrimitiveValueDescription,
+  ValueDescriptionType
 } from "../src/IntermediateStructure";
 
 describe("JsonConversion", () => {
@@ -214,11 +214,18 @@ describe("JsonConversion", () => {
 
       it("converts properties of the object", () => {
         // Arrange
-        const testInnerPropertyName = "myStringProp";
-        const testInnerPropertyValue = "This is a test value";
+        const testInnerPrimitivtePropertyName = "myPrimitiveProp";
+        const testInnerStringPropertyName = "myStringProp";
+        const testInnerPlaceholderPropertyName = "myPlaceholderProp";
+        const testInnerArrayPropertyName = "myArrayProp";
+        const testInnerPluralFormPropertyName = "myPluralFormProp";
         const testPropertyName = "myObjectProp";
         const testPropertyValue = {
-          [testInnerPropertyName]: testInnerPropertyValue
+          [testInnerPrimitivtePropertyName]: 42,
+          [testInnerStringPropertyName]: "This is a test value",
+          [testInnerPlaceholderPropertyName]: "This is {param1: number} placeholder",
+          [testInnerArrayPropertyName]: [],
+          [testInnerPluralFormPropertyName]: { 0: "zero", 1: "one", n: "many" }
         };
         const testJsonObject = {
           [testPropertyName]: testPropertyValue
@@ -233,11 +240,18 @@ describe("JsonConversion", () => {
           isObjectValueDescription,
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
-        const innerStringValueDescription = getAs(
-          isPrimitiveStringValueDescription,
-          innerObjectValueDescription.propertyDescriptions.get(testInnerPropertyName)
+        const innerPropertyDescriptions = innerObjectValueDescription.propertyDescriptions;
+        expect(innerPropertyDescriptions.get(testInnerPrimitivtePropertyName)!.type).toBe(
+          ValueDescriptionType.Primitive
         );
-        expect(innerStringValueDescription.value).toEqual(testInnerPropertyValue);
+        expect(innerPropertyDescriptions.get(testInnerStringPropertyName)!.type).toBe(ValueDescriptionType.Primitive);
+        expect(innerPropertyDescriptions.get(testInnerPlaceholderPropertyName)!.type).toBe(
+          ValueDescriptionType.PlaceholderFunction
+        );
+        expect(innerPropertyDescriptions.get(testInnerArrayPropertyName)!.type).toBe(ValueDescriptionType.Array);
+        expect(innerPropertyDescriptions.get(testInnerPluralFormPropertyName)!.type).toBe(
+          ValueDescriptionType.PluralFunction
+        );
       });
 
       it("converts plural form objects to PluralFunctionValueDescription", () => {
@@ -342,8 +356,14 @@ describe("JsonConversion", () => {
       it("converts string values", () => {
         // Arrange
         const testPropertyName = "myArrayProp";
-        const testValue = "this is a test";
-        const testPropertyValue: string[] = [testValue];
+        const testPropertyValue = [
+          42,
+          "This is a test value",
+          "This is {param1: number} placeholder",
+          [],
+          { 0: "zero", 1: "one", n: "many" },
+          {}
+        ];
         const testJsonObject = {
           [testPropertyName]: testPropertyValue
         };
@@ -357,11 +377,13 @@ describe("JsonConversion", () => {
           isArrayValueDescription,
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
-        const innerStringValueDescripiton = getAs(
-          isPrimitiveStringValueDescription,
-          innerArrayValueDescription.valueDescriptions[0]
-        );
-        expect(innerStringValueDescripiton.value).toBe(testValue);
+        const innerValueDescriptions = innerArrayValueDescription.valueDescriptions;
+        expect(innerValueDescriptions[0].type).toBe(ValueDescriptionType.Primitive);
+        expect(innerValueDescriptions[1].type).toBe(ValueDescriptionType.Primitive);
+        expect(innerValueDescriptions[2].type).toBe(ValueDescriptionType.PlaceholderFunction);
+        expect(innerValueDescriptions[3].type).toBe(ValueDescriptionType.Array);
+        expect(innerValueDescriptions[4].type).toBe(ValueDescriptionType.PluralFunction);
+        expect(innerValueDescriptions[5].type).toBe(ValueDescriptionType.Object);
       });
     });
   });
