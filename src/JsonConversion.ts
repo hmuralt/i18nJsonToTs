@@ -69,18 +69,7 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
 
   for (const key of keys) {
     const value = obj[key];
-    const valueType = typeof value;
-    let valueDescription;
-
-    if (valueType === "string") {
-      valueDescription = convertString(value);
-    } else if (valueType === "object" && Array.isArray(value)) {
-      valueDescription = convertArray(value);
-    } else if (valueType === "object") {
-      valueDescription = convertObject(value);
-    } else {
-      valueDescription = convertPrimitive(value);
-    }
+    const valueDescription = convertValue(value);
 
     propertyDescriptions.set(key, valueDescription);
   }
@@ -93,29 +82,31 @@ function convertSimpleObject(obj: {}): ObjectValueDescription {
 
 // tslint:disable-next-line: no-any
 function convertArray(values: any[]): ArrayValueDescription {
-  const valueDescriptions: ValueDescription[] = [];
-
-  for (const value of values) {
-    const valueType = typeof value;
-    let valueDescription;
-
-    if (valueType === "string") {
-      valueDescription = convertString(value);
-    } else if (valueType === "object" && Array.isArray(value)) {
-      valueDescription = convertArray(value);
-    } else if (valueType === "object") {
-      valueDescription = convertObject(value);
-    } else {
-      valueDescription = convertPrimitive(value);
-    }
-
-    valueDescriptions.push(valueDescription);
-  }
+  const valueDescriptions = values.map((value) => convertValue(value));
 
   return {
     type: ValueDescriptionType.Array,
     valueDescriptions
   };
+}
+
+// tslint:disable-next-line: no-any
+function convertValue(value: any) {
+  const valueType = typeof value;
+
+  if (valueType === "string") {
+    return convertString(value);
+  }
+
+  if (Array.isArray(value)) {
+    return convertArray(value);
+  }
+
+  if (valueType === "object") {
+    return convertObject(value);
+  }
+
+  return convertPrimitive(value);
 }
 
 function convertPrimitive(value: PrimitiveJsonType): PrimitiveValueDescription {
