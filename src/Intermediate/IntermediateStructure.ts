@@ -39,7 +39,8 @@ export interface Arg {
   type: ArgType;
 }
 
-export type StringPart = Array<string | Pick<Arg, "name">>;
+export type ArgName = Pick<Arg, "name">;
+export type StringPart = Array<string | ArgName>;
 
 export interface PlaceholderFunctionValueDescription extends ValueDescription {
   type: ValueDescriptionType.PlaceholderFunction;

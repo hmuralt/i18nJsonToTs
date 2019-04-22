@@ -1,4 +1,4 @@
-import { convertJson } from "../../src/JsonToIntermediate/JsonConversion";
+import convertJson from "../../src/JsonToIntermediate/JsonConversion";
 import {
   ArgType,
   isObjectValueDescription,

@@ -16,7 +16,7 @@ import {
 import { placeholderRegex, getAllMatches } from "./RegexUtils";
 import { PluralFormObject, PrimitiveJsonType, pluralFormNthKey } from "./JsonStructure";
 
-export function convertJson(jsonString: string) {
+export default function convertJson(jsonString: string) {
   const json = JSON.parse(jsonString);
 
   return convertObject(json);
