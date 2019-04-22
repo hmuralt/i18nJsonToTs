@@ -12,10 +12,9 @@ import {
   PrimitiveValueDescription,
   isPrimitiveStringValueDescription,
   ArrayValueDescription
-} from "./IntermediateStructure";
-import { getAllMatches } from "./RegexUtils";
-import { pluralFormNthKey, placeholderRegex } from "./Configuration";
-import { PluralFormObject, PrimitiveJsonType } from "./JsonStructure";
+} from "../Intermediate/IntermediateStructure";
+import { placeholderRegex, getAllMatches } from "./RegexUtils";
+import { PluralFormObject, PrimitiveJsonType, pluralFormNthKey } from "./JsonStructure";
 
 export function convertJson(jsonString: string) {
   const json = JSON.parse(jsonString);

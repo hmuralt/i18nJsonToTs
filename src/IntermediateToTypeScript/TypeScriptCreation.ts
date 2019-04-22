@@ -5,7 +5,7 @@ import {
   SyntaxKind,
   createLiteral
 } from "typescript";
-import { ObjectValueDescription } from "./JsonToIntermediate/IntermediateStructure";
+import { ObjectValueDescription } from "../Intermediate/IntermediateStructure";
 
 export function createObject(objectValueDescription: ObjectValueDescription) {
   const propertyAssignments = new Array<PropertyAssignment>();

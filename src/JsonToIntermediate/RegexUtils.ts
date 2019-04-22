@@ -1,3 +1,5 @@
+export const placeholderRegex = /(?<!\\){\s*([^:\s]+)\s*:\s*([^}\s]+)\s*(?<!\\)}/gm;
+
 export function* getAllMatches(value: string, regex: RegExp) {
   const clone = new RegExp(regex.source, regex.flags);
   let match = null;

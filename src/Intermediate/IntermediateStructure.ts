@@ -1,5 +1,4 @@
-import { pluralFormNthKey } from "./Configuration";
-import { PrimitiveJsonType } from "./JsonStructure";
+import { PrimitiveJsonType, pluralFormNthKey } from "../JsonToIntermediate/JsonStructure";
 
 export enum ValueDescriptionType {
   Primitive,
