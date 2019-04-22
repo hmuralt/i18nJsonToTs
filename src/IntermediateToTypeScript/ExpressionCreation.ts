@@ -25,7 +25,9 @@ import {
   PlaceholderFunctionValueDescription,
   isPlaceholderFunctionValueDescription,
   isPluralFunctionValueDescription,
-  PluralFunctionValueDescription
+  PluralFunctionValueDescription,
+  StringPart,
+  PluralFormObjectDescription
 } from "../Intermediate/IntermediateStructure";
 import { pluralFormNthKey } from "../JsonToIntermediate/JsonStructure";
 import createParameters from "./ParameterCreation";
@@ -86,10 +88,16 @@ function createPlaceholderFunction(valueDescription: PlaceholderFunctionValueDes
 }
 
 function createPluralFunction(valueDescription: PluralFunctionValueDescription) {
-  const { args, values } = valueDescription;
+  const parameters = createParameters(valueDescription.args);
 
-  const parameters = createParameters(args);
+  const statements = createPluralStatements(valueDescription.values);
 
+  const block = createBlock(statements, false);
+
+  return createArrowFunction(undefined, undefined, parameters, undefined, undefined, block);
+}
+
+function createPluralStatements(values: PluralFormObjectDescription) {
   const valueKeys = Object.keys(values);
 
   const statements: Statement[] = valueKeys
@@ -97,25 +105,28 @@ function createPluralFunction(valueDescription: PluralFunctionValueDescription) 
     .map((valueKey) => {
       const value = values[valueKey];
 
-      const condition = createBinary(
-        createIdentifier("count"),
-        SyntaxKind.EqualsEqualsEqualsToken,
-        createLiteral(parseInt(valueKey, 10))
-      );
-
-      const ifBody = createBlock(
-        [createReturn(typeof value === "string" ? createLiteral(value) : createTemplate(value))],
-        false
-      );
-
-      return createIf(condition, ifBody);
+      return createPluralIfBlock(valueKey, value);
     });
 
-  const nthValue = valueDescription.values[pluralFormNthKey];
+  const nthValue = values[pluralFormNthKey];
 
-  statements.push(createReturn(typeof nthValue === "string" ? createLiteral(nthValue) : createTemplate(nthValue)));
+  statements.push(createPluralValueReturn(nthValue));
 
-  const block = createBlock(statements, false);
+  return statements;
+}
 
-  return createArrowFunction(undefined, undefined, parameters, undefined, undefined, block);
+function createPluralIfBlock(valueKey: string, value: string | StringPart) {
+  const condition = createBinary(
+    createIdentifier("count"),
+    SyntaxKind.EqualsEqualsEqualsToken,
+    createLiteral(parseInt(valueKey, 10))
+  );
+
+  const ifBody = createBlock([createPluralValueReturn(value)], false);
+
+  return createIf(condition, ifBody);
+}
+
+function createPluralValueReturn(stringPart: string | StringPart) {
+  return createReturn(typeof stringPart === "string" ? createLiteral(stringPart) : createTemplate(stringPart));
 }
