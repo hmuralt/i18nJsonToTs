@@ -1,6 +1,6 @@
 # i18nJsonToTs
 
-Utility to generate TypeScript out of a translatable I18N JSON.
+Utility to generate TypeScript out of a translatable I18N JSON. (using TypeScript compiler API)
 
 Note: this is not a tool that maps JSON to TypeScript one to one.
 
