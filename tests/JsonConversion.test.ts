@@ -64,11 +64,10 @@ describe("JsonConversion", () => {
             type: ArgType.String
           }
         ]);
-        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
+        expect(placeholderFunctionValueDescription.stringParts).toEqual([
           "This is a test with a ",
           {
-            name: testPlaceholderName,
-            type: ArgType.String
+            name: testPlaceholderName
           },
           " placeholder."
         ]);
@@ -93,10 +92,9 @@ describe("JsonConversion", () => {
           isPlaceholderFunctionValueDescription,
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
-        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
+        expect(placeholderFunctionValueDescription.stringParts).toEqual([
           {
-            name: testPlaceholderName,
-            type: ArgType.String
+            name: testPlaceholderName
           },
           " placeholder."
         ]);
@@ -121,11 +119,10 @@ describe("JsonConversion", () => {
           isPlaceholderFunctionValueDescription,
           objectValueDescription.propertyDescriptions.get(testPropertyName)
         );
-        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
+        expect(placeholderFunctionValueDescription.stringParts).toEqual([
           "it begins with ",
           {
-            name: testPlaceholderName,
-            type: ArgType.String
+            name: testPlaceholderName
           }
         ]);
       });
@@ -155,10 +152,9 @@ describe("JsonConversion", () => {
             type: ArgType.String
           }
         ]);
-        expect(placeholderFunctionValueDescription.stringTemplate).toEqual([
+        expect(placeholderFunctionValueDescription.stringParts).toEqual([
           {
-            name: testPlaceholderName,
-            type: ArgType.String
+            name: testPlaceholderName
           }
         ]);
       });
@@ -286,8 +282,7 @@ describe("JsonConversion", () => {
           1: "One test",
           n: [
             {
-              name: "count",
-              type: ArgType.Number
+              name: "count"
             },
             " tests"
           ]

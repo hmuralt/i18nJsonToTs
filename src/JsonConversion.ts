@@ -1,7 +1,7 @@
 import {
   ObjectValueDescription,
   PlaceholderFunctionValueDescription,
-  StringTemplate,
+  StringPart,
   getTypeFrom,
   Arg,
   PluralFunctionValueDescription,
@@ -45,7 +45,7 @@ function convertPluralFormObject(obj: PluralFormObject): PluralFunctionValueDesc
       argSet.add(arg);
     }
 
-    values[key] = valueDescription.stringTemplate;
+    values[key] = valueDescription.stringParts;
   }
 
   return {
@@ -60,7 +60,7 @@ function getPluralFunctionValues(nthValue: string) {
 
   return isPrimitiveValueDescription(nthValueDescription)
     ? { n: nthValueDescription.value }
-    : { n: nthValueDescription.stringTemplate };
+    : { n: nthValueDescription.stringParts };
 }
 
 function convertSimpleObject(obj: {}): ObjectValueDescription {
@@ -129,7 +129,7 @@ function convertStringToPlaceholderFunction(
   placeholderMatches: RegExpExecArray[]
 ): PlaceholderFunctionValueDescription {
   const argSet = createArgSet();
-  const stringTemplateBuilder = createStringTemplateBuilder(value);
+  const stringPartsBuilder = createStringPartsBuilder(value);
 
   for (const placeholderMatch of placeholderMatches) {
     const arg = {
@@ -138,13 +138,13 @@ function convertStringToPlaceholderFunction(
     };
 
     argSet.add(arg);
-    stringTemplateBuilder.add(arg, placeholderMatch[0]);
+    stringPartsBuilder.add(arg, placeholderMatch[0]);
   }
 
   return {
     type: ValueDescriptionType.PlaceholderFunction,
     args: argSet.args,
-    stringTemplate: stringTemplateBuilder.stringTemplate
+    stringParts: stringPartsBuilder.stringPart
   };
 }
 
@@ -172,8 +172,8 @@ function createArgSet(initialArgs: Arg[] = []) {
   };
 }
 
-function createStringTemplateBuilder(value: string) {
-  const stringTemplate: StringTemplate = [];
+function createStringPartsBuilder(value: string) {
+  const stringPart: StringPart = [];
   let unprocessedValue = value;
 
   return {
@@ -182,17 +182,17 @@ function createStringTemplateBuilder(value: string) {
       unprocessedValue = splitValue[1];
 
       if (splitValue[0] !== "") {
-        stringTemplate.push(splitValue[0]);
+        stringPart.push(splitValue[0]);
       }
 
-      stringTemplate.push(arg);
+      stringPart.push({ name: arg.name });
     },
-    get stringTemplate() {
+    get stringPart() {
       if (unprocessedValue !== "") {
-        stringTemplate.push(unprocessedValue);
+        stringPart.push(unprocessedValue);
       }
 
-      return stringTemplate;
+      return stringPart;
     }
   };
 }

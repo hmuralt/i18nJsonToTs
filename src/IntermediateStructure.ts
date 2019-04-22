@@ -40,17 +40,17 @@ export interface Arg {
   type: ArgType;
 }
 
-export type StringTemplate = Array<string | Arg>;
+export type StringPart = Array<string | Pick<Arg, "name">>;
 
 export interface PlaceholderFunctionValueDescription extends ValueDescription {
   type: ValueDescriptionType.PlaceholderFunction;
   args: Arg[];
-  stringTemplate: StringTemplate;
+  stringParts: StringPart;
 }
 
 export interface PluralFormObjectDescription {
-  [count: number]: StringTemplate | string;
-  [pluralFormNthKey]: StringTemplate | string;
+  [count: number]: StringPart | string;
+  [pluralFormNthKey]: StringPart | string;
 }
 
 export interface PluralFunctionValueDescription extends ValueDescription {
