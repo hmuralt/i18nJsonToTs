@@ -1,6 +1,6 @@
 import { isObjectLiteralExpression, isPropertyAssignment, Identifier } from "typescript";
 import { createObject } from "../src/TypeScriptCreation";
-import { ObjectValueDescription, ValueDescriptionType } from "../src/IntermediateStructure";
+import { ObjectValueDescription, ValueDescriptionType } from "../src/JsonToIntermediate/IntermediateStructure";
 
 describe("TypeScriptCreation", () => {
   describe("createObject", () => {

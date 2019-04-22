@@ -1,4 +1,4 @@
-import { convertJson } from "../src/JsonConversion";
+import { convertJson } from "../src/JsonToIntermediate/JsonConversion";
 import {
   ArgType,
   isObjectValueDescription,
@@ -8,7 +8,7 @@ import {
   isArrayValueDescription,
   isPrimitiveValueDescription,
   ValueDescriptionType
-} from "../src/IntermediateStructure";
+} from "../src/JsonToIntermediate/IntermediateStructure";
 
 describe("JsonConversion", () => {
   describe("convertJson", () => {
