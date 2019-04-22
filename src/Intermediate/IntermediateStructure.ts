@@ -31,7 +31,7 @@ export interface ArrayValueDescription extends ValueDescription {
 export enum ArgType {
   String = "string",
   Number = "number",
-  ToString = "toString"
+  Object = "object"
 }
 
 export interface Arg {
