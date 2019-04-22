@@ -1,4 +1,4 @@
-import convertJson from "../../src/JsonToIntermediate/JsonConversion";
+import convertObject from "../../src/JsonToIntermediate/JsonConversion";
 import {
   ArgType,
   isObjectValueDescription,
@@ -22,7 +22,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -50,7 +50,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -84,7 +84,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -111,7 +111,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -138,7 +138,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -170,7 +170,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -197,7 +197,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -228,7 +228,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -263,7 +263,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -293,7 +293,7 @@ describe("JsonConversion", () => {
         // Arrange
         const testPropertyName = "myObjectProp";
         const testPropertyValue = {
-          0: "No { somePlaceholder: toString } tests",
+          0: "No { somePlaceholder: object } tests",
           1: "One { anotherPlaceholder: string } test",
           n: "{count: number} tests"
         };
@@ -302,7 +302,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -317,7 +317,7 @@ describe("JsonConversion", () => {
           },
           {
             name: "somePlaceholder",
-            type: "toString"
+            type: "object"
           },
           {
             name: "anotherPlaceholder",
@@ -337,7 +337,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);
@@ -364,7 +364,7 @@ describe("JsonConversion", () => {
         };
 
         // Act
-        const result = convertJson(JSON.stringify(testJsonObject));
+        const result = convertObject(testJsonObject);
 
         // Assert
         const objectValueDescription = getAs(isObjectValueDescription, result);

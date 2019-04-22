@@ -16,13 +16,7 @@ import {
 import { placeholderRegex, getAllMatches } from "./RegexUtils";
 import { PluralFormObject, PrimitiveJsonType, pluralFormNthKey } from "./JsonStructure";
 
-export default function convertJson(jsonString: string) {
-  const json = JSON.parse(jsonString);
-
-  return convertObject(json);
-}
-
-function convertObject(value: {}): ObjectValueDescription | PluralFunctionValueDescription {
+export default function convertObject(value: {}): ObjectValueDescription | PluralFunctionValueDescription {
   return isPluralFormObject(value) ? convertPluralFormObject(value) : convertSimpleObject(value);
 }
 
