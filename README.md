@@ -14,7 +14,7 @@ JSON
 	"placeholderText": "This example says {helloMessage: string} to you!",
 	"pluralTexts": {
 		"0": "No example tags here.",
-		"1": "There are is one example tag with name {name: string}.",
+		"1": "There is one example tag with name {name: string}.",
 		"n": "There are {count: number} example tags with name {name: string}."
 	}
 }
@@ -31,7 +31,7 @@ Resulting TypeScript
 			return "No example tags here.";
 		}
 		if (count === 1) {
-			return `There are is one example tag with name ${name}.`;
+			return `There is one example tag with name ${name}.`;
 		}
 		return `There are ${count} example tags with name ${name}.`;
 	}
@@ -46,7 +46,7 @@ getTypeScriptFromString(`{
   "placeholderText": "This example says {helloMessage: string} to you!",
   "pluralTexts": {
     "0": "No example tags here.",
-    "1": "There are is one example tag with name {name: string}.",
+    "1": "There is one example tag with name {name: string}.",
     "n": "There are {count: number} example tags with name {name: string}."
   }
 }`);
