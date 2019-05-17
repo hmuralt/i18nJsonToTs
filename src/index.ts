@@ -3,7 +3,7 @@ import convertObject from "./JsonToIntermediate/JsonConversion";
 import createExpression from "./IntermediateToTypeScript/ExpressionCreation";
 
 export function getTypeScriptFromString(i18nJson: string, isDefaultExport: boolean = false) {
-  return getTypeScriptFromObject(JSON.parse(i18nJson));
+  return getTypeScriptFromObject(JSON.parse(i18nJson), isDefaultExport);
 }
 
 export function getTypeScriptFromObject(i18nJson: {}, isDefaultExport: boolean = false) {
