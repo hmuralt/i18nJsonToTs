@@ -12,7 +12,8 @@ import {
   createBinary,
   createReturn,
   createIf,
-  Statement
+  Statement,
+  createStringLiteral,
 } from "typescript";
 import {
   ObjectValueDescription,
@@ -27,11 +28,13 @@ import {
   isPluralFunctionValueDescription,
   PluralFunctionValueDescription,
   StringPart,
-  PluralFormObjectDescription
+  PluralFormObjectDescription,
 } from "../Intermediate/IntermediateStructure";
 import { pluralFormNthKey } from "../JsonToIntermediate/JsonStructure";
 import createParameters from "./ParameterCreation";
 import createTemplate from "./TemplateExpressionCreation";
+
+const properteyKeyIdentifierRegex = /^(?!\d)[\w$]+$/;
 
 export default function createExpression(valueDescription: ValueDescription): Expression {
   if (isPrimitiveValueDescription(valueDescription)) {
@@ -73,7 +76,9 @@ function createObject(objectValueDescription: ObjectValueDescription) {
   const propertyAssignments = new Array<PropertyAssignment>();
 
   for (const [key, valueDescription] of objectValueDescription.propertyDescriptions) {
-    propertyAssignments.push(createPropertyAssignment(key, createExpression(valueDescription)));
+    const name = properteyKeyIdentifierRegex.test(key) ? key : createStringLiteral(key);
+
+    propertyAssignments.push(createPropertyAssignment(name, createExpression(valueDescription)));
   }
 
   return createObjectLiteral(propertyAssignments);

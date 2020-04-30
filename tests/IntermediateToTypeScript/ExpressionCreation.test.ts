@@ -23,7 +23,7 @@ import {
   StringLiteral,
   isBinaryExpression,
   BinaryExpression,
-  NumericLiteral
+  NumericLiteral,
 } from "typescript";
 import createExpression from "../../src/IntermediateToTypeScript/ExpressionCreation";
 import {
@@ -34,7 +34,7 @@ import {
   ValueDescription,
   PlaceholderFunctionValueDescription,
   ArgType,
-  PluralFunctionValueDescription
+  PluralFunctionValueDescription,
 } from "../../src/Intermediate/IntermediateStructure";
 import createParameters from "../../src/IntermediateToTypeScript/ParameterCreation";
 import createTemplate from "../../src/IntermediateToTypeScript/TemplateExpressionCreation";
@@ -50,39 +50,42 @@ const testParameter = createParameter(
 );
 const testParameters = [testParameter];
 jest.mock("../../src/IntermediateToTypeScript/ParameterCreation", () => ({
-  default: jest.fn(() => testParameters)
+  default: jest.fn(() => testParameters),
 }));
 const testTemplateExpression = createTemplateExpression(createTemplateHead("head"), []);
 jest.mock("../../src/IntermediateToTypeScript/TemplateExpressionCreation", () => ({
-  default: jest.fn(() => testTemplateExpression)
+  default: jest.fn(() => testTemplateExpression),
 }));
 
 describe("TypeScriptCreation", () => {
   const testPrimitiveDescription: PrimitiveValueDescription = {
     type: ValueDescriptionType.Primitive,
-    value: 2355
+    value: 2355,
   };
   const testArrayDescriptionSimple: ArrayValueDescription = {
     type: ValueDescriptionType.Array,
-    valueDescriptions: []
+    valueDescriptions: [],
   };
   const testObjectDescriptionSimple: ObjectValueDescription = {
     type: ValueDescriptionType.Object,
-    propertyDescriptions: new Map<string, ValueDescription>()
+    propertyDescriptions: new Map<string, ValueDescription>(),
   };
   const testPlaceholderFunctionValueDescription: PlaceholderFunctionValueDescription = {
     type: ValueDescriptionType.PlaceholderFunction,
     args: [{ name: "argName", type: ArgType.Number }],
-    stringParts: ["Start ", { name: "argName" }, " end"]
+    stringParts: ["Start ", { name: "argName" }, " end"],
   };
   const testPluralFunctionValueDescription: PluralFunctionValueDescription = {
     type: ValueDescriptionType.PluralFunction,
-    args: [{ name: "count", type: ArgType.Number }, { name: "pluralArg", type: ArgType.Number }],
+    args: [
+      { name: "count", type: ArgType.Number },
+      { name: "pluralArg", type: ArgType.Number },
+    ],
     values: {
       0: "Zero",
       1: ["One ", { name: "pluralArg" }, { name: "count" }],
-      n: ["Multi ", { name: "count" }]
-    }
+      n: ["Multi ", { name: "count" }],
+    },
   };
   const testArrayDescription: ArrayValueDescription = {
     type: ValueDescriptionType.Array,
@@ -91,8 +94,8 @@ describe("TypeScriptCreation", () => {
       testArrayDescriptionSimple,
       testObjectDescriptionSimple,
       testPlaceholderFunctionValueDescription,
-      testPluralFunctionValueDescription
-    ]
+      testPluralFunctionValueDescription,
+    ],
   };
   const testObjectDescription: ObjectValueDescription = {
     type: ValueDescriptionType.Object,
@@ -101,8 +104,13 @@ describe("TypeScriptCreation", () => {
       ["arrayKey", testArrayDescription],
       ["objectKey", testObjectDescriptionSimple],
       ["placeholderFunctionKey", testPlaceholderFunctionValueDescription],
-      ["pluralFunctionKey", testPluralFunctionValueDescription]
-    ])
+      ["pluralFunctionKey", testPluralFunctionValueDescription],
+    ]),
+  };
+
+  const testObjectWithSpecialPropertiesDescription: ObjectValueDescription = {
+    type: ValueDescriptionType.Object,
+    propertyDescriptions: new Map<string, ValueDescription>([["special-key", testPrimitiveDescription]]),
   };
 
   describe("createExpression", () => {
@@ -174,6 +182,14 @@ describe("TypeScriptCreation", () => {
         expect(isArrowFunction((result.properties[3] as PropertyAssignment).initializer)).toBe(true);
         expect((result.properties[4].name as Identifier).escapedText).toBe(keys[4]);
         expect(isArrowFunction((result.properties[4] as PropertyAssignment).initializer)).toBe(true);
+      });
+
+      it("uses string literal property names when key not valid as identifier", () => {
+        // Arrange
+        // Act
+        const result = createExpression(testObjectWithSpecialPropertiesDescription) as ObjectLiteralExpression;
+
+        expect(result.properties[0].name!.kind).toBe(SyntaxKind.StringLiteral);
       });
     });
 
